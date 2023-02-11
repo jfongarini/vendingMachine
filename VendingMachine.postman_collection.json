@@ -1,0 +1,960 @@
+{
+	"info": {
+		"_postman_id": "9058b6f0-76f5-4166-87a3-b1940350fa97",
+		"name": "VendingMachine",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "VendingMachine",
+			"item": [
+				{
+					"name": "VM-Coin",
+					"item": [
+						{
+							"name": "insertCoinsVendingMachine",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"coins\":[\r\n        {\r\n            \"name\":\"1 cent\",\r\n            \"quantity\": 5\r\n        },\r\n        {\r\n            \"name\":\"5 cents\",\r\n            \"quantity\": 5\r\n        },\r\n        {\r\n            \"name\":\"10 cents\",\r\n            \"quantity\": 5\r\n        },\r\n        {\r\n            \"name\":\"25 cents\",\r\n            \"quantity\": 5\r\n        },\r\n        {\r\n            \"name\":\"50 cents\",\r\n            \"quantity\": 5\r\n        },\r\n        {\r\n            \"name\":\"1 dollar\",\r\n            \"quantity\": 5\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/2/insertCoins",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"2",
+										"insertCoins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getCoinsVendingMachine",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/2/getCoins",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"2",
+										"getCoins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "extractCoinsVendingMachine",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/1/extractCoins",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"1",
+										"extractCoins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "extractSomeCoinsVendingMachine",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"coins\":[\r\n        {\r\n            \"name\":\"5 cents\",\r\n            \"quantity\": 2\r\n        },\r\n        {\r\n            \"name\":\"50 cents\",\r\n            \"quantity\": 1\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/1/extractSomeCoins",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"1",
+										"extractSomeCoins"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "VM-Product",
+					"item": [
+						{
+							"name": "insertProductsVendingMachine",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"products\":[\r\n        {\r\n            \"name\":\"Apple\",\r\n            \"quantity\": 3\r\n        },\r\n        {\r\n            \"name\":\"Lemon\",\r\n            \"quantity\": 3\r\n        },\r\n        {\r\n            \"name\":\"Banana\",\r\n            \"quantity\": 1\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/2/insertProducts",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"2",
+										"insertProducts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getProductsVendingMachine",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/2/getProducts",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"2",
+										"getProducts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "extractProductsVendingMachine",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/1/extractProducts",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"1",
+										"extractProducts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "extractSomeProductsVendingMachine",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"coins\":[\r\n        {\r\n            \"name\":\"5 cents\",\r\n            \"quantity\": 2\r\n        },\r\n        {\r\n            \"name\":\"50 cents\",\r\n            \"quantity\": 1\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/1/extractSomeProducts",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"1",
+										"extractSomeProducts"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "VM-Operation",
+					"item": [
+						{
+							"name": "getOperationsVendingMachine",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/2/getOperations",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"2",
+										"getOperations"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": null,
+											"disabled": true
+										},
+										{
+											"key": "to",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getOperationVendingMachine",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/vendingmachine/1/getOperation?idOperation=5",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"vendingmachine",
+										"1",
+										"getOperation"
+									],
+									"query": [
+										{
+											"key": "idOperation",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "newVendingMachine",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"first\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/vendingmachine/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingmachine",
+								"new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteVendingmachine",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/vendingmachine/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingmachine",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getVendingmachine",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/vendingmachine/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingmachine",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllVendingmachine",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/vendingmachine/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingmachine",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateVendingmachine",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"10 cents\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/vendingmachine/update/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingmachine",
+								"update",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Coin",
+			"item": [
+				{
+					"name": "newCoin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"1 dollar\",\r\n    \"value\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/coin/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"coin",
+								"new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteCoin",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/coin/delete/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"coin",
+								"delete",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCoin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/coin/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"coin",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllCoins",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/coin/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"coin",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateCoin",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"10 cents\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/coin/update/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"coin",
+								"update",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Operation",
+			"item": [
+				{
+					"name": "newOperation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"25 cents\",\r\n    \"value\": 0.25\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/vendingmachine/2/operation/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingmachine",
+								"2",
+								"operation",
+								"new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OperationCoins",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"operation\":3,\r\n    \"coins\":[\r\n        {\r\n            \"name\":\"50 cents\",\r\n            \"quantity\": 2\r\n        },\r\n        {\r\n            \"name\":\"1 dollar\",\r\n            \"quantity\": 3\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/vendingMachine/2/operation/coins",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingMachine",
+								"2",
+								"operation",
+								"coins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OperationProduct",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"operation\":3,\r\n    \"code\": \"001\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/vendingMachine/2/operation/product",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingMachine",
+								"2",
+								"operation",
+								"product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OperationAccept",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"25 cents\",\r\n    \"value\": 0.25\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/vendingMachine/2/operation/accept?operation=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingMachine",
+								"2",
+								"operation",
+								"accept"
+							],
+							"query": [
+								{
+									"key": "operation",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OperationCancel",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"25 cents\",\r\n    \"value\": 0.25\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/vendingmachine/{id}/operation/cancel",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingmachine",
+								"{id}",
+								"operation",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OperationCoins",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/vendingMachine/2/operation/coins?operation=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingMachine",
+								"2",
+								"operation",
+								"coins"
+							],
+							"query": [
+								{
+									"key": "operation",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OperationProduct",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/vendingMachine/2/operation/product?operation=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"vendingMachine",
+								"2",
+								"operation",
+								"product"
+							],
+							"query": [
+								{
+									"key": "operation",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "newProduct",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"banana\",\r\n    \"code\": \"002\",\r\n    \"price\": 1.75\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/product/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getProduct",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAvailablesProduct",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/available",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"available"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateProduct",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"price\": 0.23\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/product/update/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"update",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllProducts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteProduct",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/delete/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"delete",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "https://www.fruityvice.com/api/fruit/all",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.fruityvice.com/api/fruit/all",
+					"protocol": "https",
+					"host": [
+						"www",
+						"fruityvice",
+						"com"
+					],
+					"path": [
+						"api",
+						"fruit",
+						"all"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
