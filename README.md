@@ -1,28 +1,6 @@
-# vendingMachine
+# Vending Machine
 Vending machine with Java using Build pattern
 
-## Table of contents
-* [General info](#general-info)
-* [Technologies](#technologies)
-* [Setup](#setup)
+This vending machine project allows you to do many things: it creates many of these vending machines, coins, and products (fruits) that must be available in a specific external API, and it also allows you to associate these coins and products with an existing vending machine and make operations like buy fruits, insert coins, take out some coins or products from your vending machine, and some other actions.
 
-## General info
-This project is simple Lorem ipsum dolor generator.
-	
-## Technologies
-Project is created with:
-* Lorem version: 12.3
-* Ipsum version: 2.33
-* Ament library version: 999
-	
-## Setup
-To run this project, install it locally using npm:
-
-```
-$ cd ../lorem
-$ npm install
-$ npm start
-```
-
-## Code Examples
-To generate lorem ipsum use special shortcode: `put-your-code-here`
+Please import [this Postman file](https://github.com/jfongarini/vendingMachine/blob/main/VendingMachine.postman_collection.json) to find the endpoints.
