@@ -4,6 +4,7 @@ import com.domain.coin.request.CoinNewRequest;
 import com.domain.coin.request.CoinUpdateRequest;
 import com.domain.coin.response.*;
 import com.service.CoinService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/")
+@Tag(name = "Coins")
 public class CoinController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VendingMachineController.class);

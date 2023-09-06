@@ -4,6 +4,7 @@ import com.domain.operation.request.OperationAddCoinsRequest;
 import com.domain.operation.request.OperationSelectProductRequest;
 import com.domain.operation.response.*;
 import com.service.OperationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/")
+@Tag(name = "Operations")
 public class OperationController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationController.class);
@@ -49,10 +51,10 @@ public class OperationController {
         }
     }
 
-    @GetMapping("vendingMachine/{id}/operation/coins")
-    public  ResponseEntity<OperationGetCoinsResponse> getCoinsOperation(@PathVariable int id, @RequestParam int operation){
+    @GetMapping("vendingMachine/operation/coins")
+    public  ResponseEntity<OperationGetCoinsResponse> getCoinsOperation(@RequestHeader(name = "Authorization", defaultValue = "")  String token){
         try {
-            OperationGetCoinsResponse response = service.getCoinsOperation(id,operation);
+            OperationGetCoinsResponse response = service.getCoinsOperation(token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){

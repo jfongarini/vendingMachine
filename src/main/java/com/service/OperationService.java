@@ -1,9 +1,9 @@
 package com.service;
 
-import com.dao.CoinDao;
-import com.dao.OperationDao;
-import com.dao.ProductDao;
-import com.dao.VendingMachineDao;
+import com.dao.*;
+import com.domain.user.data.UserData;
+import com.model.*;
+import com.security.JwtService;
 import com.util.CommonError;
 import com.util.enums.MessagesEnum;
 import com.util.enums.StatusEnum;
@@ -12,10 +12,8 @@ import com.domain.operation.request.OperationAddCoinRequest;
 import com.domain.operation.request.OperationAddCoinsRequest;
 import com.domain.operation.request.OperationSelectProductRequest;
 import com.domain.operation.response.*;
-import com.model.Coin;
-import com.model.Operation;
-import com.model.Product;
-import com.model.VendingMachine;
+import com.util.enums.UserEnum;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +46,9 @@ public class OperationService {
     @Autowired
     private ProductDao productDao;
 
+    @Autowired
+    private JwtService jwtService;
+
     public OperationNewResponse newOperation(int id){
         try {
             VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
@@ -61,10 +62,17 @@ public class OperationService {
             operation.setStatus(StatusEnum.OPEN.name());
             operation.setDate(new Date());
             operation.setVendingMachine(vendingMachine);
+
+            User user = new User();
+            user.setRole(UserEnum.USER.name());
+            user.setExpirationDate(DateUtils.addMinutes(Calendar.getInstance().getTime(),30));
+            operation.setUser(user);
+
             operationDao.save(operation);
             OperationNewData data = new OperationNewData();
             data.setOperation(operation.getOperationId());
             data.setStatus(operation.getStatus());
+            data.setToken(jwtService.getToken(operation));
 
             return new OperationNewResponse.Builder().withData(data).withMessage(MessagesEnum.OPERATION_NEW_OK.getText()).build();
 
@@ -128,19 +136,20 @@ public class OperationService {
         }
     }
 
-    public OperationGetCoinsResponse getCoinsOperation(int id, int idOperation){
+    public OperationGetCoinsResponse getCoinsOperation(String token){
         try{
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
-            if (Objects.isNull(vendingMachine)){
-                return new OperationGetCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
-            }
-
+            int idOperation = Integer.parseInt(jwtService.getUserNameFromToken(token));
             Operation operation = operationDao.findById(idOperation).orElse(null);
             if (Objects.isNull(operation)) {
                 return new OperationGetCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(operation.getVendingMachine().getId()).orElse(null);
+            if (Objects.isNull(vendingMachine)){
+                return new OperationGetCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<Coin> coinList = coinDao.findAll();
@@ -394,7 +403,7 @@ public class OperationService {
             data.setStatus(operation.getStatus());
             return new OperationCancelResponse.Builder().withData(data).withMessage(MessagesEnum.OPERATION_CANCEL_OK.getText()).build();
         } catch (Exception e){
-            LOGGER.error("Accept Operation failed.",e);
+            LOGGER.error("Cancel Operation failed.",e);
             return new OperationCancelResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .withMessage(MessagesEnum.OPERATION_CANCEL_FAIL.getText()).build()).build();
         }

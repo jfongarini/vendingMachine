@@ -3,6 +3,7 @@ package com.controller;
 import com.domain.vendingMachine.request.*;
 import com.domain.vendingMachine.response.*;
 import com.service.VendingMachineService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/")
+@Tag(name = "Vending Machine")
 public class VendingMachineController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VendingMachineController.class);

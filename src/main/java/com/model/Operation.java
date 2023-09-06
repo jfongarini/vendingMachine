@@ -29,6 +29,10 @@ public class Operation {
     @JoinColumn(name = "vending_machine_id", nullable = false)
     private VendingMachine vendingMachine;
 
+    @OneToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(
             name = "operation_coin",
@@ -99,5 +103,13 @@ public class Operation {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

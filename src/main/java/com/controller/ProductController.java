@@ -4,6 +4,7 @@ import com.domain.product.request.ProductNewRequest;
 import com.domain.product.request.ProductUpdateRequest;
 import com.domain.product.response.*;
 import com.service.ProductService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/")
+@Tag(name = "Products")
 public class ProductController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);

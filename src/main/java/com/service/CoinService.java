@@ -5,6 +5,7 @@ import com.domain.coin.data.*;
 import com.domain.coin.request.CoinNewRequest;
 import com.domain.coin.request.CoinUpdateRequest;
 import com.domain.coin.response.*;
+import com.security.JwtService;
 import com.util.CommonError;
 import com.util.enums.MessagesEnum;
 import com.model.Coin;
@@ -27,6 +28,9 @@ public class CoinService {
 
     @Autowired
     private CoinDao coinDao;
+
+    @Autowired
+    private JwtService jwtService;
 
     public CoinNewResponse newCoin(CoinNewRequest request, BindingResult result) {
         try {

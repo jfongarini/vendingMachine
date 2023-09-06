@@ -120,10 +120,10 @@ public class GetOperationCoinsTest {
 
     @Test
     public void getCoinsOperationControllerException(){
-        Mockito.doThrow(new RuntimeException()).when(service).getCoinsOperation(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doThrow(new RuntimeException()).when(service).getCoinsOperation(Mockito.anyString());
 
         ResponseEntity<OperationGetCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),OperationGetCoinsResponse.class,5,1);
-        Mockito.doCallRealMethod().when(service).getCoinsOperation(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doCallRealMethod().when(service).getCoinsOperation(Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

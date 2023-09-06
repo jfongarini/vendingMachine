@@ -6,6 +6,7 @@ public class OperationNewData implements Serializable {
 
     private int operation;
     private String status;
+    private String token;
 
     public int getOperation() {
         return operation;
@@ -21,5 +22,13 @@ public class OperationNewData implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
