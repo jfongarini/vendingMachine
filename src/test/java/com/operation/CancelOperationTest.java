@@ -90,7 +90,6 @@ public class CancelOperationTest {
         List<Product> products = new ArrayList<>();
         products.add(product);
         vendingMachine.setProducts(products);
-        vendingMachine.setOperations(operations);
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
@@ -135,9 +134,9 @@ public class CancelOperationTest {
     @Test
     public void cancelOperationControllerException(){
 
-        Mockito.doThrow(new RuntimeException()).when(service).cancelOperation(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doThrow(new RuntimeException()).when(service).cancelOperation(Mockito.anyString());
         ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(new HttpHeaders()),OperationCancelResponse.class,5,1);
-        Mockito.doCallRealMethod().when(service).cancelOperation(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doCallRealMethod().when(service).cancelOperation(Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
@@ -149,7 +148,6 @@ public class CancelOperationTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setProducts(products);
         operation.setValue(0.5);
         operation.setStatus(StatusEnum.OPEN.name());

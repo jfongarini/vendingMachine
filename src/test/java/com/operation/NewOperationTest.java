@@ -36,7 +36,7 @@ public class NewOperationTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/vendingMachine/{id}/operation/new";
+    private String URL = "/api/operations";
 
     @Autowired
     private TestRestTemplate restTemplate;

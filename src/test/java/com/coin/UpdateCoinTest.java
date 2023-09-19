@@ -39,7 +39,7 @@ public class UpdateCoinTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/coin/update/{id}";
+    private String URL = "/api/coins/{id}";
 
     @Autowired
     private TestRestTemplate restTemplate;

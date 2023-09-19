@@ -76,7 +76,6 @@ public class GetOperationProductsTest {
         Operation operation = setOperation(vendingMachine);
         Set<Operation> operations = new HashSet<>();
         operations.add(operation);
-        vendingMachine.setOperations(operations);
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
@@ -121,10 +120,10 @@ public class GetOperationProductsTest {
 
     @Test
     public void getProductsOperationControllerException(){
-        Mockito.doThrow(new RuntimeException()).when(service).getProductOperation(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doThrow(new RuntimeException()).when(service).getProductOperation(Mockito.anyString());
 
         ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),OperationGetSelectedProductsResponse.class,5,1);
-        Mockito.doCallRealMethod().when(service).getProductOperation(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doCallRealMethod().when(service).getProductOperation(Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
@@ -158,7 +157,6 @@ public class GetOperationProductsTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setCoins(coins);
         operation.setProducts(products);
         operation.setValue(0.5);

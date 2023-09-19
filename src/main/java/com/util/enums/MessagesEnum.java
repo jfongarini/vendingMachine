@@ -3,6 +3,7 @@ package com.util.enums;
 public enum MessagesEnum {
     //Common
     PARAM_VALID_FAIL("Parameters validation failed."),
+    USER_NOT_EXIST("User doesn't exist."),
 
     // Vending Machine
     VM_NOT_EXIST("Vending Machine doesn't exist."),
@@ -18,6 +19,8 @@ public enum MessagesEnum {
     VM_GET_ALL_FAIL("Get All Vending Machine failed."),
     VM_UPDATE_OK("Update Vending Machine successful."),
     VM_UPDATE_FAIL("Update Vending Machine failed."),
+    VM_LOGIN_OK("Login Vending Machine successful."),
+    VM_LOGIN_FAIL("Login Vending Machine failed."),
 
 
     // Vending Machine - Coin
@@ -27,8 +30,6 @@ public enum MessagesEnum {
     VMC_GET_FAIL("Get Coins from Vending Machine failed."),
     VMC_DELETE_OK("Extract all Coins from Vending Machine successful."),
     VMC_DELETE_FAIL("Extract all Coins from Vending Machine failed."),
-    VMC_DELETE_SOME_OK("Extract some Coins from Vending Machine successful."),
-    VMC_DELETE_SOME_FAIL("Extract some Coins from Vending Machine failed."),
 
     // Vending Machine - Product
     VMP_POST_OK("Insert Product in Vending Machine successful."),
@@ -37,8 +38,6 @@ public enum MessagesEnum {
     VMP_GET_FAIL("Get Products from Vending Machine failed."),
     VMP_DELETE_OK("Extract all Products from Vending Machine successful."),
     VMP_DELETE_FAIL("Extract all Products from Vending Machine failed."),
-    VMP_DELETE_SOME_OK("Extract some Products from Vending Machine successful."),
-    VMP_DELETE_SOME_FAIL("Extract some Products from Vending Machine failed."),
 
     // Vending Machine - Operation
     VMO_OPERATION_NOT_EXIST("Operation doesn't exist."),

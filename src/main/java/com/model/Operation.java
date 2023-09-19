@@ -25,10 +25,6 @@ public class Operation {
     @Column(name = "status")
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "vending_machine_id", nullable = false)
-    private VendingMachine vendingMachine;
-
     @OneToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -63,14 +59,6 @@ public class Operation {
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    public VendingMachine getVendingMachine() {
-        return vendingMachine;
-    }
-
-    public void setVendingMachine(VendingMachine vendingMachine) {
-        this.vendingMachine = vendingMachine;
     }
 
     public List<Coin> getCoins() {
@@ -112,4 +100,5 @@ public class Operation {
     public void setUser(User user) {
         this.user = user;
     }
+
 }

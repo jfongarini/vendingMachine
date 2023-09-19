@@ -1,7 +1,7 @@
 package com.security;
 
-import com.dao.OperationDao;
-import com.model.Operation;
+import com.dao.UserDao;
+import com.model.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtService jwtService;
 
     @Autowired
-    private OperationDao operationDao;
+    private UserDao userDao;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -42,16 +42,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             LOGGER.info(INVALID_TOKEN);
             return;
         }
-        String operationId = jwtService.getUserNameFromToken(token);
+        String userId = jwtService.getUserNameFromToken(token);
 
-        if (Objects.nonNull(operationId) && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())){
-            Optional<Operation> operation = operationDao.findById(Integer.parseInt(operationId));
-            if (!operation.isPresent()){
+        if (Objects.nonNull(userId) && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())){
+            Optional<User> user = userDao.findById(Integer.parseInt(userId));
+            if (user.isEmpty()){
                 LOGGER.info(INVALID_TOKEN);
                 return;
             }
-            if (jwtService.isTokenValid(token,operation.get())){
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(operation,null,operation.get().getUser().getAuthorities());
+            if (jwtService.isTokenValid(token,user.get())){
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user,null,user.get().getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 LOGGER.info("Validated connection TOKEN");

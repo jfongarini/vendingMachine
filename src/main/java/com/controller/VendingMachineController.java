@@ -1,5 +1,15 @@
 package com.controller;
 
+import com.domain.vendingMachine.coin.request.VmInsertCoinsRequest;
+import com.domain.vendingMachine.coin.response.VmExtractCoinsResponse;
+import com.domain.vendingMachine.coin.response.VmGetCoinsResponse;
+import com.domain.vendingMachine.coin.response.VmInsertCoinsResponse;
+import com.domain.vendingMachine.operation.response.VmGetOperationResponse;
+import com.domain.vendingMachine.operation.response.VmGetOperationsResponse;
+import com.domain.vendingMachine.product.request.VmInsertProductsRequest;
+import com.domain.vendingMachine.product.response.VmExtractProductsResponse;
+import com.domain.vendingMachine.product.response.VmGetProductsResponse;
+import com.domain.vendingMachine.product.response.VmInsertProductsResponse;
 import com.domain.vendingMachine.request.*;
 import com.domain.vendingMachine.response.*;
 import com.service.VendingMachineService;
@@ -26,8 +36,20 @@ public class VendingMachineController {
     @Autowired
     private VendingMachineService service;
 
-    @PostMapping("vendingmachine/new")
-    public ResponseEntity<VendingMachineNewResponse> newVendingMachine(@RequestBody @Valid VendingMachineNewRequest request, BindingResult bindingResult) {
+    @PostMapping("vending-machines/{id}/login")
+    public ResponseEntity<VendingMachineLoginResponse> loginVendingMachine(@PathVariable int id) {
+        try {
+            VendingMachineLoginResponse response = service.loginVendingMachine(id);
+            return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
+                    : ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            LOGGER.error("Error in Login Vending Machine service");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new VendingMachineLoginResponse.Builder().build());
+        }
+    }
+
+    @PostMapping("vending-machines")
+    public ResponseEntity<VendingMachineNewResponse> newVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestBody @Valid VendingMachineNewRequest request, BindingResult bindingResult) {
         try {
             VendingMachineNewResponse response = service.newVendingMachine(request, bindingResult);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
@@ -38,8 +60,8 @@ public class VendingMachineController {
         }
     }
 
-    @DeleteMapping("vendingmachine/delete/{id}")
-    public ResponseEntity<VendingMachineDeleteResponse> deleteVendingMachine(@PathVariable int id){
+    @DeleteMapping("vending-machines/{id}")
+    public ResponseEntity<VendingMachineDeleteResponse> deleteVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @PathVariable int id){
         try {
             VendingMachineDeleteResponse response = service.deleteVendingMachine(id);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
@@ -50,8 +72,8 @@ public class VendingMachineController {
         }
     }
 
-    @GetMapping("vendingmachine/{id}")
-    public ResponseEntity<VendingMachineGetResponse> getVendingMachine(@PathVariable int id){
+    @GetMapping("vending-machines/{id}")
+    public ResponseEntity<VendingMachineGetResponse> getVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @PathVariable int id){
         try {
             VendingMachineGetResponse response = service.getVendingMachine(id);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
@@ -62,8 +84,8 @@ public class VendingMachineController {
         }
     }
 
-    @GetMapping("vendingmachine/all")
-    public ResponseEntity<VendingMachineGetAllResponse> getAllVendingMachine(){
+    @GetMapping("vending-machines")
+    public ResponseEntity<VendingMachineGetAllResponse> getAllVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token){
         try {
             VendingMachineGetAllResponse response = service.getAllVendingMachine();
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
@@ -74,10 +96,10 @@ public class VendingMachineController {
         }
     }
 
-    @PutMapping("vendingmachine/update/{id}")
-    public ResponseEntity<VendingMachineUpdateResponse> updateVendingMachine(@RequestBody @Valid VendingMachineUpdateRequest request, @PathVariable int id){
+    @PutMapping("vending-machines")
+    public ResponseEntity<VendingMachineUpdateResponse> updateVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestBody @Valid VendingMachineUpdateRequest request){
         try {
-            VendingMachineUpdateResponse response = service.updateVendingMachine(request, id);
+            VendingMachineUpdateResponse response = service.updateVendingMachine(request, token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -87,13 +109,13 @@ public class VendingMachineController {
     }
 
     //************************
-    //vendingmachine Coins
+    //vending-machine Coins
     //************************
 
-    @PostMapping("vendingmachine/{id}/insertCoins")
-    public ResponseEntity<VmInsertCoinsResponse> insertCoinsVendingMachine(@PathVariable int id, @RequestBody @Valid VmInsertCoinsRequest request, BindingResult bindingResult) {
+    @PostMapping("vending-machines/coins")
+    public ResponseEntity<VmInsertCoinsResponse> insertCoinsVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestBody @Valid VmInsertCoinsRequest request, BindingResult bindingResult) {
         try {
-            VmInsertCoinsResponse response = service.insertCoinsVendingMachine(id, request, bindingResult);
+            VmInsertCoinsResponse response = service.insertCoinsVendingMachine(token, request, bindingResult);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -102,10 +124,10 @@ public class VendingMachineController {
         }
     }
 
-    @GetMapping("vendingmachine/{id}/getCoins")
-    public ResponseEntity<VmGetCoinsResponse> getCoinsVendingMachine(@PathVariable int id) {
+    @GetMapping("vending-machines/coins")
+    public ResponseEntity<VmGetCoinsResponse> getCoinsVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token) {
         try {
-            VmGetCoinsResponse response = service.getCoinsVendingMachine(id);
+            VmGetCoinsResponse response = service.getCoinsVendingMachine(token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -114,22 +136,10 @@ public class VendingMachineController {
         }
     }
 
-    @DeleteMapping("vendingmachine/{id}/extractCoins")
-    public ResponseEntity<VmExtractCoinsResponse> extractCoinsVendingMachine(@PathVariable int id) {
+    @DeleteMapping("vending-machines/coins")
+    public ResponseEntity<VmExtractCoinsResponse> extractCoinsVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token) {
         try {
-            VmExtractCoinsResponse response = service.extractCoinsVendingMachine(id);
-            return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
-                    : ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            LOGGER.error("Error in Delete Coins of Vending Machine service");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new VmExtractCoinsResponse.Builder().build());
-        }
-    }
-
-    @DeleteMapping("vendingmachine/{id}/extractSomeCoins")
-    public ResponseEntity<VmExtractCoinsResponse> extractSomeCoinsVendingMachine(@PathVariable int id,@RequestBody @Valid VmExtractSomeCoinsRequest request, BindingResult bindingResult) {
-        try {
-            VmExtractCoinsResponse response = service.extractSomeCoinsVendingMachine(id,request, bindingResult);
+            VmExtractCoinsResponse response = service.extractCoinsVendingMachine(token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -139,14 +149,14 @@ public class VendingMachineController {
     }
 
     //************************
-    //vendingmachine Products
+    //vending-machine Products
     //************************
 
 
-    @PostMapping("vendingmachine/{id}/insertProducts")
-    public ResponseEntity<VmInsertProductsResponse> insertProductsVendingMachine(@PathVariable int id,@RequestBody @Valid VmInsertProductsRequest request, BindingResult bindingResult) {
+    @PostMapping("vending-machines/products")
+    public ResponseEntity<VmInsertProductsResponse> insertProductsVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestBody @Valid VmInsertProductsRequest request, BindingResult bindingResult) {
         try {
-            VmInsertProductsResponse response = service.insertProductsVendingMachine(id,request, bindingResult);
+            VmInsertProductsResponse response = service.insertProductsVendingMachine(token,request, bindingResult);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -155,10 +165,10 @@ public class VendingMachineController {
         }
     }
 
-    @GetMapping("vendingmachine/{id}/getProducts")
-    public ResponseEntity<VmGetProductsResponse> getProductsVendingMachine(@PathVariable int id) {
+    @GetMapping("vending-machines/products")
+    public ResponseEntity<VmGetProductsResponse> getProductsVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token) {
         try {
-            VmGetProductsResponse response = service.getProductsVendingMachine(id);
+            VmGetProductsResponse response = service.getProductsVendingMachine(token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -167,22 +177,10 @@ public class VendingMachineController {
         }
     }
 
-    @DeleteMapping("vendingmachine/{id}/extractProducts")
-    public ResponseEntity<VmExtractProductsResponse> extractProductsVendingMachine(@PathVariable int id) {
+    @DeleteMapping("vending-machines/products")
+    public ResponseEntity<VmExtractProductsResponse> extractProductsVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token) {
         try {
-            VmExtractProductsResponse response = service.extractProductsVendingMachine(id);
-            return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
-                    : ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            LOGGER.error("Error in Extract Products of Vending Machine service");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new VmExtractProductsResponse.Builder().build());
-        }
-    }
-
-    @DeleteMapping("vendingmachine/{id}/extractSomeProducts")
-    public ResponseEntity<VmExtractProductsResponse> extractSomeProductsVendingMachine(@PathVariable int id,@RequestBody @Valid VmExtractSomeProductsRequest request, BindingResult bindingResult) {
-        try {
-            VmExtractProductsResponse response = service.extractSomeProductsVendingMachine(id,request, bindingResult);
+            VmExtractProductsResponse response = service.extractProductsVendingMachine(token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -192,13 +190,13 @@ public class VendingMachineController {
     }
 
     //************************
-    //vendingmachine Operations
+    //vending-machine Operations
     //************************
 
-    @GetMapping("vendingmachine/{id}/getOperations")
-    public ResponseEntity<VmGetOperationsResponse> getOperationsVendingMachine(@PathVariable int id, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
+    @GetMapping("vending-machines/operations")
+    public ResponseEntity<VmGetOperationsResponse> getOperationsVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
         try {
-            VmGetOperationsResponse response = service.getOperationsVendingMachine(id,from,to);
+            VmGetOperationsResponse response = service.getOperationsVendingMachine(token,from,to);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -207,10 +205,10 @@ public class VendingMachineController {
         }
     }
 
-    @GetMapping("vendingmachine/{id}/getOperation")
-    public ResponseEntity<VmGetOperationResponse> getOperationVendingMachine(@PathVariable int id, @RequestParam int idOperation) {
+    @GetMapping("vending-machines/operations/{id}")
+    public ResponseEntity<VmGetOperationResponse> getOperationVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @PathVariable int idOperation) {
         try {
-            VmGetOperationResponse response = service.getOperationVendingMachine(id,idOperation);
+            VmGetOperationResponse response = service.getOperationVendingMachine(token,idOperation);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {

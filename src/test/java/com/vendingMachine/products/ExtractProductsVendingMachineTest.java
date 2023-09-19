@@ -2,7 +2,7 @@ package com.vendingMachine.products;
 
 import com.dao.ProductDao;
 import com.dao.VendingMachineDao;
-import com.domain.vendingMachine.response.VmExtractProductsResponse;
+import com.domain.vendingMachine.product.response.VmExtractProductsResponse;
 import com.model.Product;
 import com.model.VendingMachine;
 import com.service.VendingMachineService;
@@ -111,10 +111,10 @@ public class ExtractProductsVendingMachineTest {
     @Test
     public void vendingMachineExtractProductsControllerException(){
 
-        Mockito.doThrow(new RuntimeException()).when(service).extractProductsVendingMachine(Mockito.anyInt());
+        Mockito.doThrow(new RuntimeException()).when(service).extractProductsVendingMachine(Mockito.anyString());
 
         ResponseEntity<VmExtractProductsResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, new HttpEntity<Void>(new HttpHeaders()),VmExtractProductsResponse.class,5);
-        Mockito.doCallRealMethod().when(service).extractProductsVendingMachine(Mockito.anyInt());
+        Mockito.doCallRealMethod().when(service).extractProductsVendingMachine(Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

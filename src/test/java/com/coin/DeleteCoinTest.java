@@ -35,7 +35,7 @@ public class DeleteCoinTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/coin/delete/{id}";
+    private String URL = "/api/coins/{id}";
 
     @Autowired
     private TestRestTemplate restTemplate;

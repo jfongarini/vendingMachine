@@ -35,7 +35,7 @@ public class GetCoinTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/coin/{id}";
+    private String URL = "/api/coins/{id}";
 
     @Autowired
     private TestRestTemplate restTemplate;

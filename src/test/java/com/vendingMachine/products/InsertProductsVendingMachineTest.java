@@ -2,9 +2,9 @@ package com.vendingMachine.products;
 
 import com.dao.ProductDao;
 import com.dao.VendingMachineDao;
-import com.domain.vendingMachine.request.VmProductRequest;
-import com.domain.vendingMachine.request.VmInsertProductsRequest;
-import com.domain.vendingMachine.response.VmInsertProductsResponse;
+import com.domain.vendingMachine.product.request.VmProductRequest;
+import com.domain.vendingMachine.product.request.VmInsertProductsRequest;
+import com.domain.vendingMachine.product.response.VmInsertProductsResponse;
 import com.model.Product;
 import com.model.VendingMachine;
 import com.service.VendingMachineService;
@@ -188,10 +188,10 @@ public class InsertProductsVendingMachineTest {
 
         HttpEntity<VmInsertProductsRequest> request = new HttpEntity<>(data);
 
-        Mockito.doThrow(new RuntimeException()).when(service).insertProductsVendingMachine(Mockito.anyInt(),Mockito.any(), Mockito.any());
+        Mockito.doThrow(new RuntimeException()).when(service).insertProductsVendingMachine(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         ResponseEntity<VmInsertProductsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,VmInsertProductsResponse.class,5);
-        Mockito.doCallRealMethod().when(service).insertProductsVendingMachine(Mockito.anyInt(),Mockito.any(), Mockito.any());
+        Mockito.doCallRealMethod().when(service).insertProductsVendingMachine(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

@@ -3,9 +3,7 @@ package com.model;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "coin")
@@ -21,6 +19,9 @@ public class Coin {
 
     @Column(name = "value")
     private Double value;
+
+    @Column(name = "exist")
+    private Boolean exist;
 
     @ManyToMany(mappedBy = "coins")
     private List<VendingMachine> vendingMachines = new ArrayList<>();
@@ -66,5 +67,13 @@ public class Coin {
 
     public void setOperations(List<Operation> operations) {
         this.operations = operations;
+    }
+
+    public Boolean getExist() {
+        return exist;
+    }
+
+    public void setExist(Boolean exist) {
+        this.exist = exist;
     }
 }

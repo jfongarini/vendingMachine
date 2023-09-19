@@ -2,7 +2,7 @@ package com.vendingMachine.operations;
 
 import com.dao.OperationDao;
 import com.dao.VendingMachineDao;
-import com.domain.vendingMachine.response.VmGetOperationResponse;
+import com.domain.vendingMachine.operation.response.VmGetOperationResponse;
 import com.model.Coin;
 import com.model.Operation;
 import com.model.Product;
@@ -72,7 +72,6 @@ public class GetOperationVendingMachineTest {
         Operation operation = setOperation(vendingMachine);
         Set<Operation> operations = new HashSet<>();
         operations.add(operation);
-        vendingMachine.setOperations(operations);
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
 
         ResponseEntity<VmGetOperationResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),VmGetOperationResponse.class,5,1);
@@ -120,9 +119,9 @@ public class GetOperationVendingMachineTest {
 
     @Test
     public void vendingMachineGetOperationControllerException(){
-        Mockito.doThrow(new RuntimeException()).when(service).getOperationVendingMachine(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doThrow(new RuntimeException()).when(service).getOperationVendingMachine(Mockito.anyString(),Mockito.anyInt());
         ResponseEntity<VmGetOperationResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),VmGetOperationResponse.class,5,1);
-        Mockito.doCallRealMethod().when(service).getOperationVendingMachine(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doCallRealMethod().when(service).getOperationVendingMachine(Mockito.anyString(),Mockito.anyInt());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
@@ -146,7 +145,6 @@ public class GetOperationVendingMachineTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setCoins(coins);
         operation.setProducts(products);
         operation.setValue(0.5);

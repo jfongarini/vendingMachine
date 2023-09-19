@@ -2,9 +2,9 @@ package com.vendingMachine.coins;
 
 import com.dao.CoinDao;
 import com.dao.VendingMachineDao;
-import com.domain.vendingMachine.request.VmCoinRequest;
-import com.domain.vendingMachine.request.VmInsertCoinsRequest;
-import com.domain.vendingMachine.response.VmInsertCoinsResponse;
+import com.domain.vendingMachine.coin.request.VmCoinRequest;
+import com.domain.vendingMachine.coin.request.VmInsertCoinsRequest;
+import com.domain.vendingMachine.coin.response.VmInsertCoinsResponse;
 import com.model.Coin;
 import com.model.VendingMachine;
 import com.service.VendingMachineService;
@@ -189,10 +189,10 @@ public class InsertCoinsVendingMachineTest {
 
         HttpEntity<VmInsertCoinsRequest> request = new HttpEntity<>(data);
 
-        Mockito.doThrow(new RuntimeException()).when(service).insertCoinsVendingMachine(Mockito.anyInt(),Mockito.any(), Mockito.any());
+        Mockito.doThrow(new RuntimeException()).when(service).insertCoinsVendingMachine(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         ResponseEntity<VmInsertCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,VmInsertCoinsResponse.class,5);
-        Mockito.doCallRealMethod().when(service).insertCoinsVendingMachine(Mockito.anyInt(),Mockito.any(), Mockito.any());
+        Mockito.doCallRealMethod().when(service).insertCoinsVendingMachine(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

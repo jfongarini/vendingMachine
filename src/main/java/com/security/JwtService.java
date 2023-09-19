@@ -1,6 +1,6 @@
 package com.security;
 
-import com.model.Operation;
+import com.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -16,16 +16,16 @@ import java.util.function.Function;
 public class JwtService {
 
     private static final String SECRET_KEY="586E3272357538782F413F4428472B4B6250655368566B597033733676397924";
-    public String getToken(Operation operation){
-        return getToken(new HashMap<>(),operation);
+    public String getToken(User user){
+        return getToken(new HashMap<>(),user);
     }
 
-    private String getToken(HashMap<String, Object> extraClaims,Operation operation) {
+    private String getToken(HashMap<String, Object> extraClaims,User user) {
         return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(String.valueOf(operation.getOperationId()))
+                .setSubject(String.valueOf(user.getUserId()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(operation.getUser().getExpirationDate())
+                .setExpiration(user.getExpirationDate())
                 .signWith(getKey())
                 .compact();
     }
@@ -39,9 +39,9 @@ public class JwtService {
         return getClaims(token, Claims::getSubject);
     }
 
-    public boolean isTokenValid(String token, Operation operation){
+    public boolean isTokenValid(String token, User user){
         final String username = getUserNameFromToken(token);
-        return (username.equals(String.valueOf(operation.getOperationId())) && !isTokenExpired(token));
+        return (username.equals(String.valueOf(user.getUserId())) && !isTokenExpired(token));
     }
 
     private Claims getAllClaims(String token){

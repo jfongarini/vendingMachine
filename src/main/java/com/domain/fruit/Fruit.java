@@ -8,9 +8,6 @@ public class Fruit {
     private String order;
     private Nutritions nutritions;
 
-    public Fruit() {
-    }
-
     public Fruit(String genus, String name, int id, String family, String order, Nutritions nutritions) {
         this.genus = genus;
         this.name = name;

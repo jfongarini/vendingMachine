@@ -76,7 +76,6 @@ public class GetOperationCoinsTest {
         Operation operation = setOperation(vendingMachine);
         Set<Operation> operations = new HashSet<>();
         operations.add(operation);
-        vendingMachine.setOperations(operations);
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
         ResponseEntity<OperationGetCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),OperationGetCoinsResponse.class,5,1);
@@ -154,7 +153,6 @@ public class GetOperationCoinsTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setCoins(coins);
         operation.setProducts(products);
         operation.setValue(0.5);

@@ -48,7 +48,7 @@ public class AddCoinsOperationTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/vendingMachine/{id}/operation/coins";
+    private String URL = "/api/operations/coins";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -100,7 +100,6 @@ public class AddCoinsOperationTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setCoins(coins);
         operation.setValue(0.5);
         operation.setStatus(StatusEnum.OPEN.name());
@@ -110,7 +109,6 @@ public class AddCoinsOperationTest {
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
-        data.setOperation(1);
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
         coinData1.setName(coin1.getName());
         coinData1.setQuantity(2L);
@@ -133,7 +131,6 @@ public class AddCoinsOperationTest {
     @Test
     public void operationAddCoinsRequestFail(){
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
-        data.setOperation(1);
         List<OperationAddCoinRequest> operationAddCoinRequestList = new ArrayList<>();
         data.setCoins(operationAddCoinRequestList);
         HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
@@ -147,7 +144,6 @@ public class AddCoinsOperationTest {
     @Test
     public void operationAddCoinsVmNull(){
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
-        data.setOperation(1);
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
         coinData1.setName("test");
         coinData1.setQuantity(2L);
@@ -171,7 +167,6 @@ public class AddCoinsOperationTest {
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
-        data.setOperation(22);
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
         coinData1.setName("test");
         coinData1.setQuantity(2L);
@@ -202,7 +197,6 @@ public class AddCoinsOperationTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setCoins(coins);
         operation.setValue(0.5);
         operation.setStatus(StatusEnum.CLOSE_OK.name());
@@ -212,7 +206,6 @@ public class AddCoinsOperationTest {
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
-        data.setOperation(1);
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
         coinData1.setName(coin1.getName());
         coinData1.setQuantity(2L);
@@ -242,7 +235,6 @@ public class AddCoinsOperationTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setCoins(coins);
         operation.setValue(0.5);
         operation.setStatus(StatusEnum.OPEN.name());
@@ -252,7 +244,6 @@ public class AddCoinsOperationTest {
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
-        data.setOperation(1);
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
         coinData1.setName(coin1.getName());
         coinData1.setQuantity(2L);
@@ -272,7 +263,6 @@ public class AddCoinsOperationTest {
         Mockito.doThrow(new RuntimeException()).when(vendingMachineDao).findById(Mockito.anyInt());
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
-        data.setOperation(1);
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
         coinData1.setName("test");
         coinData1.setQuantity(2L);
@@ -289,11 +279,11 @@ public class AddCoinsOperationTest {
     @Test
     public void operationAddCoinsControllerException(){
 
-        Mockito.doThrow(new RuntimeException()).when(service).addCoinsOperation(Mockito.anyInt(),Mockito.any(), Mockito.any());
+        Mockito.doThrow(new RuntimeException()).when(service).addCoinsOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
         HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
         ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
-        Mockito.doCallRealMethod().when(service).addCoinsOperation(Mockito.anyInt(),Mockito.any(), Mockito.any());
+        Mockito.doCallRealMethod().when(service).addCoinsOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

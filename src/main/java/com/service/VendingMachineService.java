@@ -1,18 +1,33 @@
 package com.service;
 
-import com.dao.CoinDao;
-import com.dao.OperationDao;
-import com.dao.ProductDao;
-import com.dao.VendingMachineDao;
+import com.dao.*;
+import com.domain.vendingMachine.coin.data.*;
+import com.domain.vendingMachine.coin.request.VmCoinRequest;
+import com.domain.vendingMachine.coin.request.VmInsertCoinsRequest;
+import com.domain.vendingMachine.coin.response.VmExtractCoinsResponse;
+import com.domain.vendingMachine.coin.response.VmGetCoinsResponse;
+import com.domain.vendingMachine.coin.response.VmInsertCoinsResponse;
+import com.domain.vendingMachine.operation.data.VmGetOperationCoinData;
+import com.domain.vendingMachine.operation.data.VmGetOperationData;
+import com.domain.vendingMachine.operation.data.VmGetOperationProductData;
+import com.domain.vendingMachine.operation.data.VmGetOperationsData;
+import com.domain.vendingMachine.operation.response.VmGetOperationResponse;
+import com.domain.vendingMachine.operation.response.VmGetOperationsResponse;
+import com.domain.vendingMachine.product.data.*;
+import com.domain.vendingMachine.product.request.VmInsertProductsRequest;
+import com.domain.vendingMachine.product.request.VmProductRequest;
+import com.domain.vendingMachine.product.response.VmExtractProductsResponse;
+import com.domain.vendingMachine.product.response.VmGetProductsResponse;
+import com.domain.vendingMachine.product.response.VmInsertProductsResponse;
+import com.model.*;
+import com.security.JwtService;
 import com.util.CommonError;
 import com.domain.vendingMachine.data.*;
 import com.util.enums.MessagesEnum;
 import com.domain.vendingMachine.request.*;
 import com.domain.vendingMachine.response.*;
-import com.model.Coin;
-import com.model.Operation;
-import com.model.Product;
-import com.model.VendingMachine;
+import com.util.enums.UserEnum;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +56,36 @@ public class VendingMachineService {
     private ProductDao productDao;
 
     @Autowired
+    private UserDao userDao;
+
+    @Autowired
     private OperationDao operationDao;
+
+    @Autowired
+    private JwtService jwtService;
+
+    public VendingMachineLoginResponse loginVendingMachine(int id){
+        try{
+            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+            if (Objects.isNull(vendingMachine)) {
+                return new VendingMachineLoginResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+            }
+
+            User user = new User();
+            user.setRole(UserEnum.ADMIN.name());
+            user.setExpirationDate(DateUtils.addMinutes(Calendar.getInstance().getTime(),30));
+            user.setVendingMachine(vendingMachine);
+            userDao.save(user);
+
+            VendingMachineLoginData data = new VendingMachineLoginData();
+            data.setToken(jwtService.getToken(user));
+            return new VendingMachineLoginResponse.Builder().withData(data).withMessage(MessagesEnum.VM_LOGIN_OK.getText()).build();
+        } catch (Exception e){
+            LOGGER.error("Login Vending Machine failed.",e);
+            return new VendingMachineLoginResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value()).withMessage(MessagesEnum.VM_LOGIN_FAIL.getText()).build()).build();
+        }
+    }
 
     public VendingMachineNewResponse newVendingMachine(VendingMachineNewRequest request, BindingResult result){
         try{
@@ -64,7 +108,7 @@ public class VendingMachineService {
     public VendingMachineDeleteResponse deleteVendingMachine(int id) {
         try {
             Optional<VendingMachine> vendingMachine = vendingMachineDao.findById(id);
-            if (Objects.isNull(vendingMachine)){
+            if (vendingMachine.isEmpty()){
                 return new VendingMachineDeleteResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
@@ -82,7 +126,7 @@ public class VendingMachineService {
     public VendingMachineGetResponse getVendingMachine(int id) {
         try {
             Optional<VendingMachine> vendingMachine = vendingMachineDao.findById(id);
-            if (Objects.isNull(vendingMachine)){
+            if (vendingMachine.isEmpty()){
                 return new VendingMachineGetResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
@@ -117,23 +161,31 @@ public class VendingMachineService {
         }
     }
 
-    public VendingMachineUpdateResponse updateVendingMachine(VendingMachineUpdateRequest request, int id) {
+    public VendingMachineUpdateResponse updateVendingMachine(VendingMachineUpdateRequest request, String token) {
         try {
             if (Objects.isNull(request.getName())){
                 return new VendingMachineUpdateResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.VM_PARAMETERS_FAIL.getText()).build()).build();
             }
-            Optional<VendingMachine> vendingMachine = vendingMachineDao.findById(id);
+
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VendingMachineUpdateResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
                 return new VendingMachineUpdateResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
-            vendingMachine.get().setName(request.getName());
-            vendingMachineDao.save(vendingMachine.get());
+            vendingMachine.setName(request.getName());
+            vendingMachineDao.save(vendingMachine);
 
             VendingMachineUpdateData data = new VendingMachineUpdateData();
-            data.setId(vendingMachine.get().getId());
-            data.setName(vendingMachine.get().getName());
+            data.setId(vendingMachine.getId());
+            data.setName(vendingMachine.getName());
             return new VendingMachineUpdateResponse.Builder().withData(data).withMessage(MessagesEnum.VM_UPDATE_OK.getText()).build();
         } catch (Exception e) {
             LOGGER.error("Delete VendingMachine failed.", e);
@@ -143,20 +195,27 @@ public class VendingMachineService {
     }
 
     //************************
-    //vendingmachine Coins
+    //vending-machine Coins
     //************************
 
-    public VmInsertCoinsResponse insertCoinsVendingMachine(int id, VmInsertCoinsRequest request, BindingResult result){
+    public VmInsertCoinsResponse insertCoinsVendingMachine(String token, VmInsertCoinsRequest request, BindingResult result){
         try{
             if (result.hasErrors()){
                 LOGGER.error("Parameters validation failed. {}.",request);
                 return new VmInsertCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).withMessage(MessagesEnum.PARAM_VALID_FAIL.getText()).build()).build();
             }
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VmInsertCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
-                return new VmInsertCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+                return new VmInsertCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<VmInsertCoinData> vmInsertCoinDataList = new ArrayList<>();
@@ -189,18 +248,25 @@ public class VendingMachineService {
         }
     }
 
-    public VmGetCoinsResponse getCoinsVendingMachine(int id){
+    public VmGetCoinsResponse getCoinsVendingMachine(String token){
         try{
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VmGetCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
-                return new VmGetCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+                return new VmGetCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<Coin> coinList = coinDao.findAll();
             List<VmGetCoinData> coins = new ArrayList<>();
-            Long totalCoins = 0L;
+            long totalCoins = 0L;
             Double totalValue = 0.0;
             for (Coin coin: coinList) {
 
@@ -230,13 +296,19 @@ public class VendingMachineService {
         }
     }
 
-    public VmExtractCoinsResponse extractCoinsVendingMachine(int id){
+    public VmExtractCoinsResponse extractCoinsVendingMachine(String token){
         try{
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VmExtractCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
+            }
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
-                return new VmExtractCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+                return new VmExtractCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<Coin> coinList = coinDao.findAll();
@@ -271,79 +343,28 @@ public class VendingMachineService {
         }
     }
 
-    public VmExtractCoinsResponse extractSomeCoinsVendingMachine(int id, VmExtractSomeCoinsRequest request, BindingResult result){
-        try{
-            if (result.hasErrors()){
-                LOGGER.error("Parameters validation failed. {}.",request);
-                return new VmExtractCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).withMessage(MessagesEnum.PARAM_VALID_FAIL.getText()).build()).build();
-            }
-
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
-            if (Objects.isNull(vendingMachine)){
-                return new VmExtractCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
-            }
-
-            List<Coin> newCoinList = new ArrayList<>();
-            List<VmExtractCoinData> coins = new ArrayList<>();
-            for (VmCoinRequest coinRequest: request.getCoins()) {
-
-                Long countCoins = vendingMachine.getCoins().stream().filter(vmc -> vmc.getName().equals(coinRequest.getName())).count();
-
-                if (countCoins >= coinRequest.getQuantity()){
-                    VmExtractCoinData coinData = new VmExtractCoinData();
-                    Optional<Coin> coin = coinDao.findByName(coinRequest.getName());
-                    if (Objects.isNull(coin)){
-                        return new VmExtractCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                                .withMessage(MessagesEnum.COIN_NOT_EXIST.getText()).build()).build();
-                    }
-
-                    Long newQuantity = countCoins - coinRequest.getQuantity();
-                    for (int i = 0; i < newQuantity; i++) {
-                        newCoinList.add(coin.get());
-                    }
-                    coinData.setName(coin.get().getName());
-                    coinData.setValue(coin.get().getValue());
-                    coinData.setQuantityToDelete(coinRequest.getQuantity());
-                    coinData.setOldQuantity(countCoins);
-                    coinData.setNewQuantity(newQuantity);
-                    coins.add(coinData);
-                } else {
-                    return new VmExtractCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value())
-                            .withMessage(MessagesEnum.VMC_DELETE_SOME_FAIL.getText() + ": Quantity of "+coinRequest.getName()+" is not correct.").build()).build();
-                }
-            }
-
-
-            vendingMachine.setCoins(newCoinList);
-            vendingMachineDao.save(vendingMachine);
-
-            VmExtractCoinsData data = new VmExtractCoinsData();
-            data.setVmName(vendingMachine.getName());
-            data.setDeletedCoins(coins);
-            return new VmExtractCoinsResponse.Builder().withData(data).withMessage(MessagesEnum.VMC_DELETE_SOME_OK.getText()).build();
-        } catch (Exception e){
-            LOGGER.error("Extract some Coins from Vending Machine failed.",e);
-            return new VmExtractCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .withMessage(MessagesEnum.VMC_DELETE_SOME_FAIL.getText()).build()).build();
-        }
-    }
-
     //************************
-    //vendingmachine Products
+    //vending-machine Products
     //************************
 
-    public VmInsertProductsResponse insertProductsVendingMachine(int id, VmInsertProductsRequest request, BindingResult result){
+    public VmInsertProductsResponse insertProductsVendingMachine(String token, VmInsertProductsRequest request, BindingResult result){
         try{
             if (result.hasErrors()){
                 LOGGER.error("Parameters validation failed. {}.",request);
                 return new VmInsertProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).withMessage(MessagesEnum.PARAM_VALID_FAIL.getText()).build()).build();
             }
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VmInsertProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
-                return new VmInsertProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+                return new VmInsertProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<VmInsertProductData> vmInsertProductDataList = new ArrayList<>();
@@ -377,18 +398,25 @@ public class VendingMachineService {
         }
     }
 
-    public VmGetProductsResponse getProductsVendingMachine(int id){
+    public VmGetProductsResponse getProductsVendingMachine(String token){
         try{
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VmGetProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
-                return new VmGetProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+                return new VmGetProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<Product> productList = productDao.findAll();
             List<VmGetProductData> products = new ArrayList<>();
-            Long quantity = 0L;
+            long quantity = 0L;
             Double totalValue = 0.0;
             for (Product product: productList) {
 
@@ -419,13 +447,20 @@ public class VendingMachineService {
         }
     }
 
-    public VmExtractProductsResponse extractProductsVendingMachine(int id){
+    public VmExtractProductsResponse extractProductsVendingMachine(String token){
         try{
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VmExtractProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
-                return new VmExtractProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+                return new VmExtractProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<Product> productList = productDao.findAll();
@@ -461,76 +496,24 @@ public class VendingMachineService {
         }
     }
 
-    public VmExtractProductsResponse extractSomeProductsVendingMachine(int id, VmExtractSomeProductsRequest request, BindingResult result){
-        try{
-            if (result.hasErrors()){
-                LOGGER.error("Parameters validation failed. {}.",request);
-                return new VmExtractProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).withMessage(MessagesEnum.PARAM_VALID_FAIL.getText()).build()).build();
-            }
-
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
-            if (Objects.isNull(vendingMachine)){
-                return new VmExtractProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
-            }
-
-            List<Product> newProductList = new ArrayList<>();
-            List<VmExtractProductData> products = new ArrayList<>();
-            for (VmProductRequest productRequest: request.getProducts()) {
-
-                Long countProducts = vendingMachine.getProducts().stream().filter(vmc -> vmc.getName().equals(productRequest.getName())).count();
-
-                if (countProducts >= productRequest.getQuantity()){
-                    VmExtractProductData productData = new VmExtractProductData();
-                    Optional<Product> product = productDao.findByName(productRequest.getName());
-                    if (Objects.isNull(product)){
-                        return new VmExtractProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                                .withMessage(MessagesEnum.PRODUCT_NOT_EXIST.getText()).build()).build();
-                    }
-
-                    Long newQuantity = countProducts - productRequest.getQuantity();
-                    for (int i = 0; i < newQuantity; i++) {
-                        newProductList.add(product.get());
-                    }
-                    productData.setName(product.get().getName());
-                    productData.setCode(product.get().getCode());
-                    productData.setPrice(product.get().getPrice());
-                    productData.setQuantityToDelete(productRequest.getQuantity());
-                    productData.setOldQuantity(countProducts);
-                    productData.setNewQuantity(newQuantity);
-                    products.add(productData);
-                } else {
-                    return new VmExtractProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value())
-                            .withMessage(MessagesEnum.VMP_DELETE_SOME_FAIL.getText() + ": Quantity of "+productRequest.getName()+" is not correct.").build()).build();
-                }
-            }
-
-
-            vendingMachine.setProducts(newProductList);
-            vendingMachineDao.save(vendingMachine);
-
-            VmExtractProductsData data = new VmExtractProductsData();
-            data.setVmName(vendingMachine.getName());
-            data.setDeletedProducts(products);
-            return new VmExtractProductsResponse.Builder().withData(data).withMessage(MessagesEnum.VMP_DELETE_SOME_OK.getText()).build();
-        } catch (Exception e){
-            LOGGER.error("Extract some Coins from Vending Machine failed.",e);
-            return new VmExtractProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .withMessage(MessagesEnum.VMP_DELETE_SOME_FAIL.getText()).build()).build();
-        }
-    }
-
     //************************
-    //vendingmachine Operations
+    //vending-machine Operations
     //************************
 
-    public VmGetOperationsResponse getOperationsVendingMachine(int id, String from, String to){
+    public VmGetOperationsResponse getOperationsVendingMachine(String token, String from, String to){
         try{
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VmGetOperationsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
-                return new VmGetOperationsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+                return new VmGetOperationsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<Operation> operations = new ArrayList<>();
@@ -551,7 +534,7 @@ public class VendingMachineService {
             List<VmGetOperationData> operationDataList = new ArrayList<>();
             for (Operation operation: operations) {
                 VmGetOperationData vmGetOperationData = new VmGetOperationData();
-                vmGetOperationData.setVendingMachine(operation.getVendingMachine().getId());
+                vmGetOperationData.setVendingMachine(user.getVendingMachine().getId());
                 vmGetOperationData.setOperationId(operation.getOperationId());
                 vmGetOperationData.setDate(operation.getDate());
                 vmGetOperationData.setValue(operation.getValue());
@@ -561,6 +544,7 @@ public class VendingMachineService {
                     VmGetOperationCoinData vmGetOperationCoinData = new VmGetOperationCoinData();
                     vmGetOperationCoinData.setName(coin.getName());
                     vmGetOperationCoinData.setValue(coin.getValue());
+                    vmGetOperationCoinDataList.add(vmGetOperationCoinData);
                 }
                 vmGetOperationData.setCoins(vmGetOperationCoinDataList);
                 List<VmGetOperationProductData> vmGetOperationProductDataList = new ArrayList<>();
@@ -569,6 +553,7 @@ public class VendingMachineService {
                     vmGetOperationProductData.setName(product.getName());
                     vmGetOperationProductData.setPrice(product.getPrice());
                     vmGetOperationProductData.setCode(product.getCode());
+                    vmGetOperationProductDataList.add(vmGetOperationProductData);
                 }
                 vmGetOperationData.setProducts(vmGetOperationProductDataList);
                 totalValue = totalValue + operation.getValue();
@@ -586,21 +571,18 @@ public class VendingMachineService {
         }
     }
 
-    public VmGetOperationResponse getOperationVendingMachine(int id,  int operationId){
+    public VmGetOperationResponse getOperationVendingMachine(String token, int operationId){
         try{
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
-            if (Objects.isNull(vendingMachine)){
-                return new VmGetOperationResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            if (Objects.isNull(user)) {
+                return new VmGetOperationResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
             }
 
-            Optional<Operation> operation = null;
-            if (Objects.nonNull(vendingMachine.getOperations())){
-                operation = vendingMachine.getOperations().stream().filter(o -> o.getOperationId() == operationId).findFirst();
-            }
-
-            if (Objects.isNull(operation)){
+            Optional<Operation> operation = operationDao.findById(operationId);
+            if (operation.isEmpty()){
                 return new VmGetOperationResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .withMessage(MessagesEnum.VMO_OPERATION_NOT_EXIST.getText()).build()).build();
             }
@@ -610,6 +592,7 @@ public class VendingMachineService {
                 VmGetOperationCoinData vmGetOperationCoinData = new VmGetOperationCoinData();
                 vmGetOperationCoinData.setName(coin.getName());
                 vmGetOperationCoinData.setValue(coin.getValue());
+                vmGetOperationCoinDataList.add(vmGetOperationCoinData);
             }
 
             List<VmGetOperationProductData> vmGetOperationProductDataList = new ArrayList<>();
@@ -618,11 +601,12 @@ public class VendingMachineService {
                 vmGetOperationProductData.setName(product.getName());
                 vmGetOperationProductData.setPrice(product.getPrice());
                 vmGetOperationProductData.setCode(product.getCode());
+                vmGetOperationProductDataList.add(vmGetOperationProductData);
             }
 
             VmGetOperationData data = new VmGetOperationData();
             data.setDate(operation.get().getDate());
-            data.setVendingMachine(operation.get().getVendingMachine().getId());
+            data.setVendingMachine(user.getVendingMachine().getId());
             data.setStatus(operation.get().getStatus());
             data.setOperationId(operation.get().getOperationId());
             data.setCoins(vmGetOperationCoinDataList);

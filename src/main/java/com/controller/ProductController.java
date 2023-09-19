@@ -26,7 +26,7 @@ public class ProductController {
     @Autowired
     private ProductService service;
 
-    @PostMapping("product/new")
+    @PostMapping("products")
     public ResponseEntity<ProductNewResponse> newProduct(@RequestBody @Valid ProductNewRequest request, BindingResult bindingResult) {
         try {
             ProductNewResponse response = service.newProduct(request, bindingResult);
@@ -38,7 +38,7 @@ public class ProductController {
         }
     }
 
-    @DeleteMapping("product/delete/{id}")
+    @DeleteMapping("products/{id}")
     public ResponseEntity<ProductDeleteResponse> deleteProduct(@PathVariable int id){
         try {
             ProductDeleteResponse response = service.deleteProduct(id);
@@ -50,7 +50,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("product/{id}")
+    @GetMapping("products/{id}")
     public ResponseEntity<ProductGetResponse> getProduct(@PathVariable int id){
         try {
             ProductGetResponse response = service.getProduct(id);
@@ -62,7 +62,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("product/all")
+    @GetMapping("products")
     public ResponseEntity<ProductGetAllResponse> getAllProduct(){
         try {
             ProductGetAllResponse response = service.getAllProduct();
@@ -74,7 +74,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("product/available")
+    @GetMapping("products/available")
     public ResponseEntity<ProductGetAvailableResponse> getAvailableProduct(){
         try {
             ProductGetAvailableResponse response = service.getAvailableProduct();
@@ -86,7 +86,7 @@ public class ProductController {
         }
     }
 
-    @PutMapping("product/update/{id}")
+    @PutMapping("products/{id}")
     public ResponseEntity<ProductUpdateResponse> updateProduct(@RequestBody @Valid ProductUpdateRequest request, @PathVariable int id){
         try {
             ProductUpdateResponse response = service.updateProduct(request, id);

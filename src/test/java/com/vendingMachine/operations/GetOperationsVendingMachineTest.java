@@ -2,7 +2,7 @@ package com.vendingMachine.operations;
 
 import com.dao.OperationDao;
 import com.dao.VendingMachineDao;
-import com.domain.vendingMachine.response.VmGetOperationsResponse;
+import com.domain.vendingMachine.operation.response.VmGetOperationsResponse;
 import com.model.Coin;
 import com.model.Operation;
 import com.model.Product;
@@ -125,10 +125,10 @@ public class GetOperationsVendingMachineTest {
 
     @Test
     public void vendingMachineGetOperationsControllerException(){
-        Mockito.doThrow(new RuntimeException()).when(service).getOperationsVendingMachine(Mockito.anyInt(),Mockito.eq(null),Mockito.eq(null));
+        Mockito.doThrow(new RuntimeException()).when(service).getOperationsVendingMachine(Mockito.anyString(),Mockito.eq(null),Mockito.eq(null));
 
         ResponseEntity<VmGetOperationsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),VmGetOperationsResponse.class,5);
-        Mockito.doCallRealMethod().when(service).getOperationsVendingMachine(Mockito.anyInt(),Mockito.eq(null),Mockito.eq(null));
+        Mockito.doCallRealMethod().when(service).getOperationsVendingMachine(Mockito.anyString(),Mockito.eq(null),Mockito.eq(null));
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
@@ -152,7 +152,6 @@ public class GetOperationsVendingMachineTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setCoins(coins);
         operation.setProducts(products);
         operation.setValue(0.5);

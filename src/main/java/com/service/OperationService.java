@@ -1,7 +1,6 @@
 package com.service;
 
 import com.dao.*;
-import com.domain.user.data.UserData;
 import com.model.*;
 import com.security.JwtService;
 import com.util.CommonError;
@@ -24,7 +23,8 @@ import org.springframework.validation.BindingResult;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class OperationService {
@@ -47,10 +47,17 @@ public class OperationService {
     private ProductDao productDao;
 
     @Autowired
+    private UserDao userDao;
+
+    @Autowired
     private JwtService jwtService;
+
+    public OperationService() {
+    }
 
     public OperationNewResponse newOperation(int id){
         try {
+
             VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
             if (Objects.isNull(vendingMachine)) {
                 return new OperationNewResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
@@ -61,18 +68,18 @@ public class OperationService {
             operation.setValue(0.0);
             operation.setStatus(StatusEnum.OPEN.name());
             operation.setDate(new Date());
-            operation.setVendingMachine(vendingMachine);
 
             User user = new User();
             user.setRole(UserEnum.USER.name());
             user.setExpirationDate(DateUtils.addMinutes(Calendar.getInstance().getTime(),30));
+            user.setVendingMachine(vendingMachine);
             operation.setUser(user);
 
             operationDao.save(operation);
             OperationNewData data = new OperationNewData();
             data.setOperation(operation.getOperationId());
             data.setStatus(operation.getStatus());
-            data.setToken(jwtService.getToken(operation));
+            data.setToken(jwtService.getToken(user));
 
             return new OperationNewResponse.Builder().withData(data).withMessage(MessagesEnum.OPERATION_NEW_OK.getText()).build();
 
@@ -83,20 +90,16 @@ public class OperationService {
         }
     }
 
-    public OperationAddCoinsResponse addCoinsOperation(int id, OperationAddCoinsRequest request, BindingResult result){
+    public OperationAddCoinsResponse addCoinsOperation(String token, OperationAddCoinsRequest request, BindingResult result){
         try {
             if (result.hasErrors()){
                 LOGGER.error("Parameters validation failed. {}.",request);
                 return new OperationAddCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).withMessage(MessagesEnum.PARAM_VALID_FAIL.getText()).build()).build();
             }
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
-            if (Objects.isNull(vendingMachine)) {
-                return new OperationAddCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
-                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
-            }
-
-            Operation operation = operationDao.findById(request.getOperation()).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            Operation operation = operationDao.findByUser(user).orElse(null);
             if (Objects.isNull(operation)) {
                 return new OperationAddCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();
@@ -105,6 +108,12 @@ public class OperationService {
             if (!operation.getStatus().equals(StatusEnum.OPEN.name())) {
                 return new OperationAddCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_CLOSED.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(operation.getUser().getVendingMachine().getId()).orElse(null);
+            if (Objects.isNull(vendingMachine)) {
+                return new OperationAddCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             List<OperationAddCoinData> operationAddCoinDataList = new ArrayList<>();
@@ -139,14 +148,15 @@ public class OperationService {
     public OperationGetCoinsResponse getCoinsOperation(String token){
         try{
 
-            int idOperation = Integer.parseInt(jwtService.getUserNameFromToken(token));
-            Operation operation = operationDao.findById(idOperation).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            Operation operation = operationDao.findByUser(user).orElse(null);
             if (Objects.isNull(operation)) {
                 return new OperationGetCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();
             }
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(operation.getVendingMachine().getId()).orElse(null);
+            VendingMachine vendingMachine = vendingMachineDao.findById(operation.getUser().getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
                 return new OperationGetCoinsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
@@ -157,7 +167,7 @@ public class OperationService {
             Double totalValue = 0.0;
             for (Coin coin: coinList) {
 
-                Long countCoins = operation.getCoins().stream().filter(vmc -> vmc.getName().equals(coin.getName())).count();
+                long countCoins = operation.getCoins().stream().filter(vmc -> vmc.getName().equals(coin.getName())).count();
 
                 if (countCoins != 0){
                     OperationGetCoinData coinData = new OperationGetCoinData();
@@ -181,20 +191,16 @@ public class OperationService {
         }
     }
 
-    public OperationSelectProductResponse addProductOperation(int id, OperationSelectProductRequest request, BindingResult result){
+    public OperationSelectProductResponse addProductOperation(String token, OperationSelectProductRequest request, BindingResult result){
         try {
             if (result.hasErrors()){
                 LOGGER.error("Parameters validation failed. {}.",request);
                 return new OperationSelectProductResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).withMessage(MessagesEnum.PARAM_VALID_FAIL.getText()).build()).build();
             }
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
-            if (Objects.isNull(vendingMachine)) {
-                return new OperationSelectProductResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
-                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
-            }
-
-            Operation operation = operationDao.findById(request.getOperation()).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            Operation operation = operationDao.findByUser(user).orElse(null);
             if (Objects.isNull(operation)) {
                 return new OperationSelectProductResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();
@@ -203,6 +209,12 @@ public class OperationService {
             if (!operation.getStatus().equals(StatusEnum.OPEN.name())) {
                 return new OperationSelectProductResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_CLOSED.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(operation.getUser().getVendingMachine().getId()).orElse(null);
+            if (Objects.isNull(vendingMachine)) {
+                return new OperationSelectProductResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
             Product product = vendingMachine.getProducts().stream()
@@ -231,27 +243,29 @@ public class OperationService {
         }
     }
 
-    public OperationGetSelectedProductsResponse getProductOperation(int id, int idOperation){
+    public OperationGetSelectedProductsResponse getProductOperation(String token){
         try{
 
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
-            if (Objects.isNull(vendingMachine)){
-                return new OperationGetSelectedProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
-            }
-
-            Operation operation = operationDao.findById(idOperation).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            Operation operation = operationDao.findByUser(user).orElse(null);
             if (Objects.isNull(operation)) {
                 return new OperationGetSelectedProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();
             }
 
+            VendingMachine vendingMachine = vendingMachineDao.findById(operation.getUser().getVendingMachine().getId()).orElse(null);
+            if (Objects.isNull(vendingMachine)){
+                return new OperationGetSelectedProductsResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+            }
+
             List<Product> productList = productDao.findAll();
             List<OperationGetSelectedProductData> products = new ArrayList<>();
-            Double totalValue = 0.0;
+            double totalValue = 0.0;
             for (Product product: productList) {
 
-                Long countProducts = operation.getProducts().stream().filter(o -> o.getName().equals(product.getName())).count();
+                long countProducts = operation.getProducts().stream().filter(o -> o.getName().equals(product.getName())).count();
 
                 if (countProducts != 0){
                     OperationGetSelectedProductData productData = new OperationGetSelectedProductData();
@@ -276,15 +290,12 @@ public class OperationService {
         }
     }
 
-    public OperationAcceptResponse acceptOperation(int id, int idOperation){
+    public OperationAcceptResponse acceptOperation(String token){
         try{
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
-            if (Objects.isNull(vendingMachine)){
-                return new OperationAcceptResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
-            }
 
-            Operation operation = operationDao.findById(idOperation).orElse(null);
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            Operation operation = operationDao.findByUser(user).orElse(null);
             if (Objects.isNull(operation)) {
                 return new OperationAcceptResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();
@@ -305,6 +316,12 @@ public class OperationService {
                         withMessage(MessagesEnum.OPERATION_INCOMPLETE_PRODUCT.getText()).build()).build();
             }
 
+            VendingMachine vendingMachine = vendingMachineDao.findById(operation.getUser().getVendingMachine().getId()).orElse(null);
+            if (Objects.isNull(vendingMachine)){
+                return new OperationAcceptResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
+            }
+
             Double totalValueCoin = operation.getCoins().stream().mapToDouble(Coin::getValue).sum();
             Double totalValueProduct = operation.getProducts().stream().mapToDouble(Product::getPrice).sum();
             if (totalValueCoin < totalValueProduct){
@@ -320,13 +337,13 @@ public class OperationService {
 
             List<Coin> coinsVMSorted = vendingMachine.getCoins().stream()
                     .sorted(Comparator.comparing(Coin::getValue).reversed())
-                    .collect(Collectors.toList());
+                    .collect(toList());
             List<OperationAcceptCoinData> coinReturnList = new ArrayList<>();
-            Double moneyReturned = 0.0;
+            double moneyReturned = 0.0;
             for (Coin coin: coinsVMSorted){
                 if (coin.getValue() <= discountValueProduct){
                     discountValueProduct = discountValueProduct - coin.getValue();
-                    Long countCoin = coinReturnList.stream().filter(c -> c.getName().equals(coin.getName())).count();
+                    long countCoin = coinReturnList.stream().filter(c -> c.getName().equals(coin.getName())).count();
                     OperationAcceptCoinData coinReturn = new OperationAcceptCoinData();
                     coinReturn.setName(coin.getName());
                     coinReturn.setValue(coin.getValue());
@@ -379,19 +396,23 @@ public class OperationService {
         }
     }
 
-    public OperationCancelResponse cancelOperation(int id, int idOperation){
+    public OperationCancelResponse cancelOperation(String token){
         try{
-            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
+
+            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
+            User user = userDao.findById(idUser).orElse(null);
+            Operation operation = operationDao.findByUser(user).orElse(null);
+            if (Objects.isNull(operation)) {
+                return new OperationCancelResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();
+            }
+
+            VendingMachine vendingMachine = vendingMachineDao.findById(operation.getUser().getVendingMachine().getId()).orElse(null);
             if (Objects.isNull(vendingMachine)){
                 return new OperationCancelResponse.Builder().withError(new CommonError.Builder(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
-            Operation operation = operationDao.findById(idOperation).orElse(null);
-            if (Objects.isNull(operation)) {
-                return new OperationCancelResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
-                        withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();
-            }
             Double totalValueProduct = operation.getProducts().stream().mapToDouble(Product::getPrice).sum();
             operation.setStatus(StatusEnum.CANCELED.name());
             operation.setValue(totalValueProduct);

@@ -94,7 +94,6 @@ public class AddProductsOperationTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setProducts(products);
         operation.setValue(0.5);
         operation.setStatus(StatusEnum.OPEN.name());
@@ -104,7 +103,6 @@ public class AddProductsOperationTest {
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
-        data.setOperation(1);
         data.setCode("001");
 
         HttpEntity<OperationSelectProductRequest> request = new HttpEntity<>(data);
@@ -120,7 +118,6 @@ public class AddProductsOperationTest {
     @Test
     public void operationAddProductsRequestFail(){
         OperationSelectProductRequest data = new OperationSelectProductRequest();
-        data.setOperation(1);
 
         HttpEntity<OperationSelectProductRequest> request = new HttpEntity<>(data);
         ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationSelectProductResponse.class,5);
@@ -133,7 +130,6 @@ public class AddProductsOperationTest {
     @Test
     public void operationAddProductsVmNull(){
         OperationSelectProductRequest data = new OperationSelectProductRequest();
-        data.setOperation(1);
         data.setCode("001");
 
         HttpEntity<OperationSelectProductRequest> request = new HttpEntity<>(data);
@@ -153,7 +149,6 @@ public class AddProductsOperationTest {
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
-        data.setOperation(1);
         data.setCode("001");
 
         HttpEntity<OperationSelectProductRequest> request = new HttpEntity<>(data);
@@ -180,7 +175,6 @@ public class AddProductsOperationTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setProducts(products);
         operation.setValue(0.5);
         operation.setStatus(StatusEnum.CLOSE_OK.name());
@@ -190,7 +184,6 @@ public class AddProductsOperationTest {
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
-        data.setOperation(1);
         data.setCode("001");
 
         HttpEntity<OperationSelectProductRequest> request = new HttpEntity<>(data);
@@ -217,7 +210,6 @@ public class AddProductsOperationTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setProducts(products);
         operation.setValue(0.5);
         operation.setStatus(StatusEnum.OPEN.name());
@@ -227,7 +219,6 @@ public class AddProductsOperationTest {
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
-        data.setOperation(1);
         data.setCode("001");
 
         HttpEntity<OperationSelectProductRequest> request = new HttpEntity<>(data);
@@ -243,7 +234,6 @@ public class AddProductsOperationTest {
         Mockito.doThrow(new RuntimeException()).when(vendingMachineDao).findById(Mockito.anyInt());
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
-        data.setOperation(1);
         data.setCode("001");
 
         HttpEntity<OperationSelectProductRequest> request = new HttpEntity<>(data);
@@ -256,11 +246,11 @@ public class AddProductsOperationTest {
     @Test
     public void operationAddProductsControllerException(){
 
-        Mockito.doThrow(new RuntimeException()).when(service).addProductOperation(Mockito.anyInt(),Mockito.any(), Mockito.any());
+        Mockito.doThrow(new RuntimeException()).when(service).addProductOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
         OperationSelectProductRequest data = new OperationSelectProductRequest();
         HttpEntity<OperationSelectProductRequest> request = new HttpEntity<>(data);
         ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationSelectProductResponse.class,5);
-        Mockito.doCallRealMethod().when(service).addProductOperation(Mockito.anyInt(),Mockito.any(), Mockito.any());
+        Mockito.doCallRealMethod().when(service).addProductOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

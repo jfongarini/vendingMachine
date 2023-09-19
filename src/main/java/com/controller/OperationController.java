@@ -27,10 +27,10 @@ public class OperationController {
     @Autowired
     private OperationService service;
 
-    @PostMapping("vendingMachine/{id}/operation/new")
-    public ResponseEntity<OperationNewResponse> newOperation(@PathVariable int id){
+    @PostMapping("operations")
+    public ResponseEntity<OperationNewResponse> newOperation(@RequestParam int vendingMachine){
         try {
-            OperationNewResponse response = service.newOperation(id);
+            OperationNewResponse response = service.newOperation(vendingMachine);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
@@ -39,10 +39,10 @@ public class OperationController {
         }
     }
 
-    @PostMapping("vendingMachine/{id}/operation/coins")
-    public  ResponseEntity<OperationAddCoinsResponse> addCoinsOperation(@PathVariable int id, @RequestBody @Valid OperationAddCoinsRequest request, BindingResult result){
+    @PostMapping("operations/coins")
+    public  ResponseEntity<OperationAddCoinsResponse> addCoinsOperation(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestBody @Valid OperationAddCoinsRequest request, BindingResult result){
         try {
-            OperationAddCoinsResponse response = service.addCoinsOperation(id,request,result);
+            OperationAddCoinsResponse response = service.addCoinsOperation(token,request,result);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
@@ -51,7 +51,7 @@ public class OperationController {
         }
     }
 
-    @GetMapping("vendingMachine/operation/coins")
+    @GetMapping("operations/coins")
     public  ResponseEntity<OperationGetCoinsResponse> getCoinsOperation(@RequestHeader(name = "Authorization", defaultValue = "")  String token){
         try {
             OperationGetCoinsResponse response = service.getCoinsOperation(token);
@@ -63,10 +63,10 @@ public class OperationController {
         }
     }
 
-    @PostMapping("vendingMachine/{id}/operation/product")
-    public  ResponseEntity<OperationSelectProductResponse> addProductOperation(@PathVariable int id, @RequestBody @Valid OperationSelectProductRequest request, BindingResult result){
+    @PostMapping("operations/product")
+    public  ResponseEntity<OperationSelectProductResponse> addProductOperation(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestBody @Valid OperationSelectProductRequest request, BindingResult result){
         try {
-            OperationSelectProductResponse response = service.addProductOperation(id,request,result);
+            OperationSelectProductResponse response = service.addProductOperation(token,request,result);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
@@ -75,10 +75,10 @@ public class OperationController {
         }
     }
 
-    @GetMapping("vendingMachine/{id}/operation/product")
-    public  ResponseEntity<OperationGetSelectedProductsResponse> getProductOperation(@PathVariable int id,@RequestParam int operation){
+    @GetMapping("operations/product")
+    public  ResponseEntity<OperationGetSelectedProductsResponse> getProductOperation(@RequestHeader(name = "Authorization", defaultValue = "")  String token){
         try {
-            OperationGetSelectedProductsResponse response = service.getProductOperation(id,operation);
+            OperationGetSelectedProductsResponse response = service.getProductOperation(token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
@@ -87,10 +87,10 @@ public class OperationController {
         }
     }
 
-    @PostMapping("vendingMachine/{id}/operation/accept")
-    public  ResponseEntity<OperationAcceptResponse> acceptOperation(@PathVariable int id, @RequestParam int operation){
+    @PostMapping("operations/accept")
+    public  ResponseEntity<OperationAcceptResponse> acceptOperation(@RequestHeader(name = "Authorization", defaultValue = "")  String token){
         try {
-            OperationAcceptResponse response = service.acceptOperation(id,operation);
+            OperationAcceptResponse response = service.acceptOperation(token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
@@ -99,10 +99,10 @@ public class OperationController {
         }
     }
 
-    @PostMapping("vendingMachine/{id}/operation/cancel")
-    public  ResponseEntity<OperationCancelResponse> cancelOperation(@PathVariable int id, @RequestParam int operation){
+    @PostMapping("operations/cancel")
+    public  ResponseEntity<OperationCancelResponse> cancelOperation(@RequestHeader(name = "Authorization", defaultValue = "")  String token){
         try {
-            OperationCancelResponse response = service.cancelOperation(id,operation);
+            OperationCancelResponse response = service.cancelOperation(token);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){

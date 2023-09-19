@@ -126,10 +126,10 @@ public class UpdateVendingMachineTest {
         data.setName("ten10");
         HttpEntity<VendingMachineUpdateRequest> request = new HttpEntity<>(data);
 
-        Mockito.doThrow(new RuntimeException()).when(service).updateVendingMachine(Mockito.any(), Mockito.anyInt());
+        Mockito.doThrow(new RuntimeException()).when(service).updateVendingMachine(Mockito.any(), Mockito.anyString());
 
         ResponseEntity<VendingMachineUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,VendingMachineUpdateResponse.class,10);
-        Mockito.doCallRealMethod().when(service).updateVendingMachine(Mockito.any(), Mockito.anyInt());
+        Mockito.doCallRealMethod().when(service).updateVendingMachine(Mockito.any(), Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

@@ -3,7 +3,6 @@ package com.model;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,8 +19,8 @@ public class VendingMachine {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "vendingMachine")
-    private Set<Operation> operations;
+    @Column(name = "exist")
+    private Boolean exist;
 
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(
@@ -55,14 +54,6 @@ public class VendingMachine {
         this.name = name;
     }
 
-    public Set<Operation> getOperations() {
-        return operations;
-    }
-
-    public void setOperations(Set<Operation> operations) {
-        this.operations = operations;
-    }
-
     public List<Coin> getCoins() {
         return coins;
     }
@@ -77,5 +68,13 @@ public class VendingMachine {
 
     public void setProducts(List<Product> products) {
         this.products = products;
+    }
+
+    public Boolean getExist() {
+        return exist;
+    }
+
+    public void setExist(Boolean exist) {
+        this.exist = exist;
     }
 }

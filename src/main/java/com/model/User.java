@@ -24,6 +24,10 @@ public class User implements UserDetails {
     @Column(name = "expiration_date")
     private Date expirationDate;
 
+    @ManyToOne
+    @JoinColumn(name = "vending_machine_id", nullable = false)
+    private VendingMachine vendingMachine;
+
     public int getUserId() {
         return userId;
     }
@@ -46,6 +50,14 @@ public class User implements UserDetails {
 
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public VendingMachine getVendingMachine() {
+        return vendingMachine;
+    }
+
+    public void setVendingMachine(VendingMachine vendingMachine) {
+        this.vendingMachine = vendingMachine;
     }
 
     @Override
@@ -82,4 +94,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

@@ -37,7 +37,7 @@ public class NewCoinTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/coin/new";
+    private String URL = "/api/coins";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -49,7 +49,7 @@ public class NewCoinTest {
 
     @BeforeEach
     void init(){
-        mockServer = startClientAndServer(1080);
+        mockServer = startClientAndServer(localServerPort);
         URL = "http://localhost:"+localServerPort+URL;
     }
 

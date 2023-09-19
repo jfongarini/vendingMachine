@@ -26,7 +26,7 @@ public class CoinController {
     @Autowired
     private CoinService service;
 
-    @PostMapping("coin/new")
+    @PostMapping("coins")
     public ResponseEntity<CoinNewResponse> newCoin(@RequestBody @Valid CoinNewRequest request, BindingResult bindingResult) {
         try {
             CoinNewResponse response = service.newCoin(request, bindingResult);
@@ -38,7 +38,7 @@ public class CoinController {
         }
     }
 
-    @DeleteMapping("coin/delete/{id}")
+    @DeleteMapping("coins/{id}")
     public ResponseEntity<CoinDeleteResponse> deleteCoin(@PathVariable int id){
         try {
             CoinDeleteResponse response = service.deleteCoin(id);
@@ -50,7 +50,7 @@ public class CoinController {
         }
     }
 
-    @GetMapping("coin/{id}")
+    @GetMapping("coins/{id}")
     public ResponseEntity<CoinGetResponse> getCoin(@PathVariable int id){
         try {
             CoinGetResponse response = service.getCoin(id);
@@ -62,7 +62,7 @@ public class CoinController {
         }
     }
 
-    @GetMapping("coin/all")
+    @GetMapping("coins")
     public ResponseEntity<CoinGetAllResponse> getAllCoin(){
         try {
             CoinGetAllResponse response = service.getAllCoin();
@@ -74,7 +74,7 @@ public class CoinController {
         }
     }
 
-    @PutMapping("coin/update/{id}")
+    @PutMapping("coins/{id}")
     public ResponseEntity<CoinUpdateResponse> updateCoin(@RequestBody @Valid CoinUpdateRequest request,@PathVariable int id){
         try {
             CoinUpdateResponse response = service.updateCoin(request, id);

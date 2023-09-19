@@ -105,7 +105,6 @@ public class AcceptOperationTest {
         products.add(product);
         vendingMachine.setProducts(products);
         vendingMachine.setCoins(coins);
-        vendingMachine.setOperations(operations);
 
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
@@ -157,7 +156,6 @@ public class AcceptOperationTest {
         List<Product> products = new ArrayList<>();
         products.add(product);
         vendingMachine.setProducts(products);
-        vendingMachine.setOperations(operations);
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
 
@@ -186,7 +184,6 @@ public class AcceptOperationTest {
         List<Product> products = new ArrayList<>();
         products.add(product);
         vendingMachine.setProducts(products);
-        vendingMachine.setOperations(operations);
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
 
@@ -215,7 +212,6 @@ public class AcceptOperationTest {
         List<Product> products = new ArrayList<>();
         products.add(product);
         vendingMachine.setProducts(products);
-        vendingMachine.setOperations(operations);
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
 
@@ -243,7 +239,6 @@ public class AcceptOperationTest {
         List<Product> products = new ArrayList<>();
         products.add(product);
         vendingMachine.setProducts(products);
-        vendingMachine.setOperations(operations);
 
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
@@ -267,9 +262,9 @@ public class AcceptOperationTest {
     @Test
     public void acceptOperationControllerException(){
 
-        Mockito.doThrow(new RuntimeException()).when(service).acceptOperation(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doThrow(new RuntimeException()).when(service).acceptOperation(Mockito.anyString());
         ResponseEntity<OperationAcceptResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(new HttpHeaders()),OperationAcceptResponse.class,5,1);
-        Mockito.doCallRealMethod().when(service).acceptOperation(Mockito.anyInt(),Mockito.anyInt());
+        Mockito.doCallRealMethod().when(service).acceptOperation(Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
@@ -295,7 +290,6 @@ public class AcceptOperationTest {
 
         Operation operation = new Operation();
         operation.setOperationId(1);
-        operation.setVendingMachine(vendingMachine);
         operation.setCoins(coins);
         operation.setProducts(products);
         operation.setValue(0.5);
