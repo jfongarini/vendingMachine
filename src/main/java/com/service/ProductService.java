@@ -51,6 +51,7 @@ public class ProductService {
             product.setName(productName);
             product.setCode(request.getCode());
             product.setPrice(request.getPrice());
+            product.setExist(true);
             productDao.save(product);
             ProductNewData data = new ProductNewData();
             data.setName(productName);
@@ -71,11 +72,13 @@ public class ProductService {
                 return new ProductDeleteResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.PRODUCT_NOT_EXIST.getText()).build()).build();
             }
+            product.get().setExist(false);
+            productDao.save(product.get());
+
             ProductDeleteData data = new ProductDeleteData();
             data.setName(product.get().getName());
             data.setPrice(product.get().getPrice());
             data.setCode(product.get().getCode());
-            productDao.delete(product.get());
             return new ProductDeleteResponse.Builder().withData(data).withMessage(MessagesEnum.PRODUCT_DELETE_OK.getText()).build();
         } catch (Exception e) {
             LOGGER.error("Delete Product failed.", e);

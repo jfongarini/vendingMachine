@@ -1,10 +1,16 @@
 package com.coin;
 
 import com.dao.CoinDao;
+import com.dao.UserDao;
+import com.dao.VendingMachineDao;
 import com.domain.coin.response.CoinDeleteResponse;
+import com.model.User;
+import com.model.VendingMachine;
+import com.security.JwtService;
 import com.util.enums.MessagesEnum;
 import com.model.Coin;
 import com.service.CoinService;
+import com.util.enums.UserEnum;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,10 +41,16 @@ public class DeleteCoinTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/coins/{id}";
+    private String URL = "/api/coins/10";
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private VendingMachineDao vendingMachineDao;
+
+    @Autowired
+    private UserDao userDao;
 
     @MockBean
     private CoinDao coinDao;
@@ -58,13 +70,18 @@ public class DeleteCoinTest {
 
     @Test
     public void coinDeleteOk(){
+
+        getAdmin();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjk4NjI4MTcxLCJleHAiOjE2OTg2Mjk5NzF9.KlL3d0ulpTvGnRlfs_akz3Ni5x6wM_c-iQ_o2mkrtinL4i7DwkyY5pCBEWHcxzjDCNEEt7tWaFaMaMhgoI3W4A");
+
         Coin coin = new Coin();
         coin.setCoinId(10);
         coin.setName("ten");
         coin.setValue(10.0);
         Mockito.when(coinDao.findById(Mockito.any())).thenReturn(Optional.of(coin));
-
-        ResponseEntity<CoinDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, new HttpEntity<Void>(new HttpHeaders()),CoinDeleteResponse.class,10);
+        System.out.println("url: "+URL);
+        ResponseEntity<CoinDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, new HttpEntity<Void>(headers),CoinDeleteResponse.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -106,5 +123,29 @@ public class DeleteCoinTest {
         Mockito.doCallRealMethod().when(service).deleteCoin(Mockito.anyInt());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    private void getAdmin(){
+        VendingMachine vm = new VendingMachine();
+        vm.setExist(true);
+        vm.setName("vm");
+        vendingMachineDao.save(vm);
+
+        User user = new User();
+        user.setRole(UserEnum.ADMIN.name());
+        user.setVendingMachine(vm);
+        userDao.save(user);
+    }
+
+    private void getUser(){
+        VendingMachine vm = new VendingMachine();
+        vm.setExist(true);
+        vm.setName("vm");
+        vendingMachineDao.save(vm);
+
+        User user = new User();
+        user.setRole(UserEnum.USER.name());
+        user.setVendingMachine(vm);
+        userDao.save(user);
     }
 }

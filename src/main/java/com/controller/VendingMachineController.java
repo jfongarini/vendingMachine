@@ -36,7 +36,7 @@ public class VendingMachineController {
     @Autowired
     private VendingMachineService service;
 
-    @PostMapping("vending-machines/{id}/login")
+    @PostMapping("vending-machines/login/{id}")
     public ResponseEntity<VendingMachineLoginResponse> loginVendingMachine(@PathVariable int id) {
         try {
             VendingMachineLoginResponse response = service.loginVendingMachine(id);
@@ -49,7 +49,7 @@ public class VendingMachineController {
     }
 
     @PostMapping("vending-machines")
-    public ResponseEntity<VendingMachineNewResponse> newVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestBody @Valid VendingMachineNewRequest request, BindingResult bindingResult) {
+    public ResponseEntity<VendingMachineNewResponse> newVendingMachine(@RequestBody @Valid VendingMachineNewRequest request, BindingResult bindingResult) {
         try {
             VendingMachineNewResponse response = service.newVendingMachine(request, bindingResult);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)

@@ -93,11 +93,21 @@ public class VendingMachineService {
                 LOGGER.error("Parameters validation failed. {}.",request);
                 return new VendingMachineNewResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).withMessage(MessagesEnum.PARAM_VALID_FAIL.getText()).build()).build();
             }
+
             VendingMachine vendingMachine = new VendingMachine();
             vendingMachine.setName(request.getName());
+            vendingMachine.setExist(true);
             vendingMachineDao.save(vendingMachine);
+
+            User user = new User();
+            user.setRole(UserEnum.ADMIN.name());
+            user.setExpirationDate(DateUtils.addMinutes(Calendar.getInstance().getTime(),30));
+            user.setVendingMachine(vendingMachine);
+            userDao.save(user);
+
             VendingMachineNewData data = new VendingMachineNewData();
             data.setName(request.getName());
+            data.setToken(jwtService.getToken(user));
             return new VendingMachineNewResponse.Builder().withData(data).withMessage(MessagesEnum.VM_NEW_OK.getText()).build();
         } catch (Exception e){
             LOGGER.error("New Vending Machine failed.",e);
@@ -112,9 +122,10 @@ public class VendingMachineService {
                 return new VendingMachineDeleteResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
+            vendingMachine.get().setExist(false);
+            vendingMachineDao.save(vendingMachine.get());
             VendingMachineDeleteData data = new VendingMachineDeleteData();
             data.setName(vendingMachine.get().getName());
-            vendingMachineDao.delete(vendingMachine.get());
             return new VendingMachineDeleteResponse.Builder().withData(data).withMessage(MessagesEnum.VM_DELETE_OK.getText()).build();
         } catch (Exception e) {
             LOGGER.error("Delete Vending Machine failed.", e);

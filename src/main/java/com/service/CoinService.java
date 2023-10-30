@@ -42,6 +42,7 @@ public class CoinService {
             Coin coin = new Coin();
             coin.setName(request.getName());
             coin.setValue(request.getValue());
+            coin.setExist(true);
             coinDao.save(coin);
             CoinNewData data = new CoinNewData();
             data.setName(request.getName());
@@ -61,10 +62,12 @@ public class CoinService {
                 return new CoinDeleteResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.COIN_NOT_EXIST.getText()).build()).build();
             }
+            coin.get().setExist(false);
+            coinDao.save(coin.get());
+
             CoinDeleteData data = new CoinDeleteData();
             data.setName(coin.get().getName());
             data.setValue(coin.get().getValue());
-            coinDao.delete(coin.get());
             return new CoinDeleteResponse.Builder().withData(data).withMessage(MessagesEnum.COIN_DELETE_OK.getText()).build();
         } catch (Exception e) {
             LOGGER.error("Delete Coin failed.", e);
