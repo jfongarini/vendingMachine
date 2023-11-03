@@ -1,5 +1,6 @@
 package com.product;
 
+import com.CommonTest;
 import com.dao.ProductDao;
 import com.domain.product.response.ProductDeleteResponse;
 import com.util.enums.MessagesEnum;
@@ -27,7 +28,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class DeleteProductTest {
+public class DeleteProductTest extends CommonTest {
 
     @SpyBean
     private ProductService service;
@@ -35,7 +36,7 @@ public class DeleteProductTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/product/delete/{id}";
+    private String URL = "/api/products/{id}";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -63,9 +64,10 @@ public class DeleteProductTest {
         product.setName("Apple");
         product.setCode("001");
         product.setPrice(1.0);
-        Mockito.when(productDao.findById(Mockito.any())).thenReturn(Optional.of(product));
+        product.setExist(true);
+        Mockito.when(productDao.findById(Mockito.anyInt())).thenReturn(Optional.of(product));
 
-        ResponseEntity<ProductDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, new HttpEntity<Void>(new HttpHeaders()),ProductDeleteResponse.class,10);
+        ResponseEntity<ProductDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, getAdmin(),ProductDeleteResponse.class,10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -75,8 +77,8 @@ public class DeleteProductTest {
     @Test
     public void productDeleteProductNull(){
 
-        Mockito.when(productDao.findById(Mockito.any())).thenReturn(null);
-        ResponseEntity<ProductDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, new HttpEntity<Void>(new HttpHeaders()),ProductDeleteResponse.class,10);
+        Mockito.when(productDao.findById(Mockito.anyInt())).thenReturn(null);
+        ResponseEntity<ProductDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, getAdmin(),ProductDeleteResponse.class,10);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -90,10 +92,11 @@ public class DeleteProductTest {
         product.setName("Apple");
         product.setCode("001");
         product.setPrice(1.0);
-        Mockito.when(productDao.findById(Mockito.any())).thenReturn(Optional.of(product));
+        product.setExist(true);
+        Mockito.when(productDao.findById(Mockito.anyInt())).thenReturn(Optional.of(product));
 
-        Mockito.doThrow(new RuntimeException()).when(productDao).delete(Mockito.any());
-        ResponseEntity<ProductDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, new HttpEntity<Void>(new HttpHeaders()),ProductDeleteResponse.class,11);
+        Mockito.doThrow(new RuntimeException()).when(productDao).save(Mockito.any());
+        ResponseEntity<ProductDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, getAdmin(),ProductDeleteResponse.class,11);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.PRODUCT_DELETE_FAIL.getText(), response.getBody().getError().getMessage());
@@ -104,7 +107,7 @@ public class DeleteProductTest {
 
         Mockito.doThrow(new RuntimeException()).when(service).deleteProduct(Mockito.anyInt());
 
-        ResponseEntity<ProductDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, new HttpEntity<Void>(new HttpHeaders()),ProductDeleteResponse.class,10);
+        ResponseEntity<ProductDeleteResponse> response = restTemplate.exchange(URL, HttpMethod.DELETE, getAdmin(),ProductDeleteResponse.class,10);
         Mockito.doCallRealMethod().when(service).deleteProduct(Mockito.anyInt());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

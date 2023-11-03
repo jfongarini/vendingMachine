@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/")
-@Tag(name = "Coins")
+@Tag(name = "Coin")
 public class CoinController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VendingMachineController.class);
@@ -39,7 +39,7 @@ public class CoinController {
     }
 
     @DeleteMapping("coins/{id}")
-    public ResponseEntity<CoinDeleteResponse> deleteCoin(@PathVariable int id){
+    public ResponseEntity<CoinDeleteResponse> deleteCoin(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @PathVariable int id){
         try {
             CoinDeleteResponse response = service.deleteCoin(id);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)

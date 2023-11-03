@@ -1,5 +1,6 @@
 package com.product;
 
+import com.CommonTest;
 import com.dao.ProductDao;
 import com.domain.product.response.ProductGetAllResponse;
 import com.util.enums.MessagesEnum;
@@ -28,7 +29,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class GetAllProductTest {
+public class GetAllProductTest extends CommonTest {
 
     @SpyBean
     private ProductService service;
@@ -36,7 +37,7 @@ public class GetAllProductTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/product/all";
+    private String URL = "/api/products";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -64,12 +65,13 @@ public class GetAllProductTest {
         product.setName("Apple");
         product.setCode("001");
         product.setPrice(1.0);
+        product.setExist(true);
         List<Product> products = new ArrayList<>();
         products.add(product);
         Mockito.when(productDao.save(Mockito.any())).thenReturn(product);
         Mockito.when(productDao.findAll()).thenReturn(products);
 
-        ResponseEntity<ProductGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), ProductGetAllResponse.class);
+        ResponseEntity<ProductGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), ProductGetAllResponse.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -80,7 +82,7 @@ public class GetAllProductTest {
     public void productGetAllProductListNull(){
         Mockito.when(productDao.findAll()).thenReturn(new ArrayList<>());
 
-        ResponseEntity<ProductGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), ProductGetAllResponse.class);
+        ResponseEntity<ProductGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), ProductGetAllResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -91,7 +93,7 @@ public class GetAllProductTest {
     public void productGetAllException(){
         Mockito.doThrow(new RuntimeException()).when(productDao).findAll();
 
-        ResponseEntity<ProductGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), ProductGetAllResponse.class);
+        ResponseEntity<ProductGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), ProductGetAllResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.PRODUCT_GET_ALL_FAIL.getText(), response.getBody().getError().getMessage());
@@ -101,7 +103,7 @@ public class GetAllProductTest {
     public void productGetAllControllerException(){
         Mockito.doThrow(new RuntimeException()).when(service).getAllProduct();
 
-        ResponseEntity<ProductGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), ProductGetAllResponse.class);
+        ResponseEntity<ProductGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), ProductGetAllResponse.class);
         Mockito.doCallRealMethod().when(service).getAllProduct();
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

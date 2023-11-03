@@ -1,5 +1,6 @@
 package com.product;
 
+import com.CommonTest;
 import com.dao.ProductDao;
 import com.domain.product.response.ProductGetAvailableResponse;
 import com.model.Product;
@@ -35,7 +36,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class GetAvailableProductTest {
+public class GetAvailableProductTest extends CommonTest {
 
     @SpyBean
     private ProductService service;
@@ -43,7 +44,7 @@ public class GetAvailableProductTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/product/available";
+    private String URL = "/api/products/available";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -80,9 +81,10 @@ public class GetAvailableProductTest {
         product.setName("Apple");
         product.setCode("001");
         product.setPrice(1.0);
+        product.setExist(true);
         productDao.save(product);
 
-        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),ProductGetAvailableResponse.class);
+        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(),ProductGetAvailableResponse.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -96,7 +98,7 @@ public class GetAvailableProductTest {
         List<String> stringList = new ArrayList<>();
         Mockito.when(apiProductService.getAllFruits()).thenReturn(stringList);
 
-        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),ProductGetAvailableResponse.class);
+        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(),ProductGetAvailableResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -107,7 +109,7 @@ public class GetAvailableProductTest {
     public void availableProductServiceException() throws IOException {
         Mockito.when(apiProductService.getAllFruits()).thenThrow(ServiceException.class);
 
-        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),ProductGetAvailableResponse.class);
+        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(),ProductGetAvailableResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.PRODUCT_GET_AVAILABLE_FAIL.getText(), response.getBody().getError().getMessage());
@@ -117,7 +119,7 @@ public class GetAvailableProductTest {
     public void availableProductException() throws IOException {
         Mockito.when(apiProductService.getAllFruits()).thenThrow(RuntimeException.class);;
 
-        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()),ProductGetAvailableResponse.class);
+        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(),ProductGetAvailableResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.PRODUCT_GET_AVAILABLE_FAIL.getText(), response.getBody().getError().getMessage());
@@ -127,7 +129,7 @@ public class GetAvailableProductTest {
     public void availableProductControllerException() throws IOException {
 
         Mockito.doThrow(new RuntimeException()).when(service).getAvailableProduct();
-        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), ProductGetAvailableResponse.class);
+        ResponseEntity<ProductGetAvailableResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), ProductGetAvailableResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

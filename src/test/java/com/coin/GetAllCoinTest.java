@@ -1,7 +1,9 @@
 package com.coin;
 
+import com.CommonTest;
 import com.dao.CoinDao;
 import com.domain.coin.response.CoinGetAllResponse;
+import com.security.JwtService;
 import com.util.enums.MessagesEnum;
 import com.model.Coin;
 import com.service.CoinService;
@@ -28,7 +30,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class GetAllCoinTest {
+public class GetAllCoinTest extends CommonTest {
 
     @SpyBean
     private CoinService service;
@@ -63,12 +65,13 @@ public class GetAllCoinTest {
         coin.setCoinId(10);
         coin.setName("ten");
         coin.setValue(10.0);
+        coin.setExist(true);
         List<Coin> coins = new ArrayList<>();
         coins.add(coin);
         Mockito.when(coinDao.save(Mockito.any())).thenReturn(coin);
         Mockito.when(coinDao.findAll()).thenReturn(coins);
 
-        ResponseEntity<CoinGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), CoinGetAllResponse.class);
+        ResponseEntity<CoinGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), CoinGetAllResponse.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -79,7 +82,7 @@ public class GetAllCoinTest {
     public void coinGetAllCoinListNull(){
         Mockito.when(coinDao.findAll()).thenReturn(new ArrayList<>());
 
-        ResponseEntity<CoinGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), CoinGetAllResponse.class);
+        ResponseEntity<CoinGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), CoinGetAllResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -90,7 +93,7 @@ public class GetAllCoinTest {
     public void coinGetAllException(){
         Mockito.doThrow(new RuntimeException()).when(coinDao).findAll();
 
-        ResponseEntity<CoinGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), CoinGetAllResponse.class);
+        ResponseEntity<CoinGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), CoinGetAllResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.COIN_GET_ALL_FAIL.getText(), response.getBody().getError().getMessage());
@@ -100,7 +103,7 @@ public class GetAllCoinTest {
     public void coinGetAllControllerException(){
         Mockito.doThrow(new RuntimeException()).when(service).getAllCoin();
 
-        ResponseEntity<CoinGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(new HttpHeaders()), CoinGetAllResponse.class);
+        ResponseEntity<CoinGetAllResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getAdmin(), CoinGetAllResponse.class);
         Mockito.doCallRealMethod().when(service).getAllCoin();
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

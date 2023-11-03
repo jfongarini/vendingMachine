@@ -296,6 +296,7 @@ public class OperationService {
             int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
             User user = userDao.findById(idUser).orElse(null);
             Operation operation = operationDao.findByUser(user).orElse(null);
+
             if (Objects.isNull(operation)) {
                 return new OperationAcceptResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.OPERATION_NOT_EXIST.getText()).build()).build();

@@ -1,16 +1,17 @@
 package com.operation;
 
-import com.dao.CoinDao;
-import com.dao.OperationDao;
-import com.dao.ProductDao;
-import com.dao.VendingMachineDao;
+import com.CommonTest;
+import com.dao.*;
 import com.domain.operation.response.OperationCancelResponse;
 import com.model.Operation;
 import com.model.Product;
+import com.model.User;
 import com.model.VendingMachine;
+import com.security.JwtService;
 import com.service.OperationService;
 import com.util.enums.MessagesEnum;
 import com.util.enums.StatusEnum;
+import com.util.enums.UserEnum;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class CancelOperationTest {
+public class CancelOperationTest extends CommonTest {
 
 
     @SpyBean
@@ -42,7 +43,7 @@ public class CancelOperationTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/vendingMachine/{id}/operation/cancel?operation={operation}";
+    private String URL = "/api/operations/cancel";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -52,6 +53,12 @@ public class CancelOperationTest {
 
     @Autowired
     private CoinDao coinDao;
+
+    @MockBean
+    private UserDao userDao;
+
+    @MockBean
+    private JwtService jwtService;
 
     @Autowired
     private ProductDao productDao;
@@ -93,7 +100,7 @@ public class CancelOperationTest {
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
         Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
 
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(new HttpHeaders()),OperationCancelResponse.class,5,1);
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -102,7 +109,7 @@ public class CancelOperationTest {
 
     @Test
     public void cancelOperationVmNull(){
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(new HttpHeaders()),OperationCancelResponse.class,5,1);
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.VM_NOT_EXIST.getText(), response.getBody().getError().getMessage());
     }
@@ -115,7 +122,7 @@ public class CancelOperationTest {
 
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
 
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(new HttpHeaders()),OperationCancelResponse.class,5,1);
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -125,7 +132,7 @@ public class CancelOperationTest {
     public void cancelOperationException(){
 
         Mockito.doThrow(new RuntimeException()).when(vendingMachineDao).findById(Mockito.any());
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(new HttpHeaders()),OperationCancelResponse.class,5,1);
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_CANCEL_FAIL.getText(), response.getBody().getError().getMessage());
@@ -135,7 +142,7 @@ public class CancelOperationTest {
     public void cancelOperationControllerException(){
 
         Mockito.doThrow(new RuntimeException()).when(service).cancelOperation(Mockito.anyString());
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(new HttpHeaders()),OperationCancelResponse.class,5,1);
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
         Mockito.doCallRealMethod().when(service).cancelOperation(Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
@@ -154,5 +161,19 @@ public class CancelOperationTest {
         operation.setDate(new Date());
 
         return operation;
+    }
+
+    public HttpEntity<HttpHeaders> getUser(VendingMachine vendingMachine){
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+
+        User user = new User();
+        user.setRole(UserEnum.USER.name());
+        user.setVendingMachine(vendingMachine);
+        Mockito.when(userDao.findById(Mockito.anyInt())).thenReturn(Optional.of(user));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        return new HttpEntity(headers);
     }
 }

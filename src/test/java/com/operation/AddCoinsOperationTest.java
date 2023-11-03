@@ -1,17 +1,22 @@
 package com.operation;
 
+import com.CommonTest;
 import com.dao.CoinDao;
 import com.dao.OperationDao;
+import com.dao.UserDao;
 import com.dao.VendingMachineDao;
 import com.domain.operation.request.OperationAddCoinRequest;
 import com.domain.operation.request.OperationAddCoinsRequest;
 import com.domain.operation.response.OperationAddCoinsResponse;
 import com.model.Coin;
 import com.model.Operation;
+import com.model.User;
 import com.model.VendingMachine;
+import com.security.JwtService;
 import com.service.OperationService;
 import com.util.enums.MessagesEnum;
 import com.util.enums.StatusEnum;
+import com.util.enums.UserEnum;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,10 +29,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +42,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class AddCoinsOperationTest {
+public class AddCoinsOperationTest{
 
     @SpyBean
     private OperationService service;
@@ -58,6 +60,12 @@ public class AddCoinsOperationTest {
 
     @Autowired
     private CoinDao coinDao;
+
+    @MockBean
+    private UserDao userDao;
+
+    @MockBean
+    private JwtService jwtService;
 
     @MockBean
     private OperationDao operationDao;
@@ -119,8 +127,8 @@ public class AddCoinsOperationTest {
         operationAddCoinRequestList.add(coinData1);
         operationAddCoinRequestList.add(coinData2);
         data.setCoins(operationAddCoinRequestList);
-        HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -130,11 +138,14 @@ public class AddCoinsOperationTest {
 
     @Test
     public void operationAddCoinsRequestFail(){
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setId(5);
+        vendingMachine.setName("first");
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
         List<OperationAddCoinRequest> operationAddCoinRequestList = new ArrayList<>();
         data.setCoins(operationAddCoinRequestList);
-        HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -143,6 +154,7 @@ public class AddCoinsOperationTest {
 
     @Test
     public void operationAddCoinsVmNull(){
+
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
         coinData1.setName("test");
@@ -150,8 +162,8 @@ public class AddCoinsOperationTest {
         List<OperationAddCoinRequest> operationAddCoinRequestList = new ArrayList<>();
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
-        HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.VM_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -173,8 +185,8 @@ public class AddCoinsOperationTest {
         List<OperationAddCoinRequest> operationAddCoinRequestList = new ArrayList<>();
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
-        HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST,getUser(data),OperationAddCoinsResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -212,8 +224,8 @@ public class AddCoinsOperationTest {
         List<OperationAddCoinRequest> operationAddCoinRequestList = new ArrayList<>();
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
-        HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_CLOSED.getText(), response.getBody().getError().getMessage());
@@ -250,8 +262,8 @@ public class AddCoinsOperationTest {
         List<OperationAddCoinRequest> operationAddCoinRequestList = new ArrayList<>();
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
-        HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.COIN_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -259,7 +271,9 @@ public class AddCoinsOperationTest {
 
     @Test
     public void operationAddCoinsException(){
-
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setId(5);
+        vendingMachine.setName("first");
         Mockito.doThrow(new RuntimeException()).when(vendingMachineDao).findById(Mockito.anyInt());
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
@@ -269,8 +283,8 @@ public class AddCoinsOperationTest {
         List<OperationAddCoinRequest> operationAddCoinRequestList = new ArrayList<>();
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
-        HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_INS_COIN_FAIL.getText(), response.getBody().getError().getMessage());
@@ -281,10 +295,24 @@ public class AddCoinsOperationTest {
 
         Mockito.doThrow(new RuntimeException()).when(service).addCoinsOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
-        HttpEntity<OperationAddCoinsRequest> request = new HttpEntity<>(data);
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,OperationAddCoinsResponse.class,5);
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
         Mockito.doCallRealMethod().when(service).addCoinsOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    public HttpEntity<HttpHeaders> getUser(VendingMachine vendingMachine){
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+
+        User user = new User();
+        user.setRole(UserEnum.USER.name());
+        user.setVendingMachine(vendingMachine);
+        Mockito.when(userDao.findById(Mockito.anyInt())).thenReturn(Optional.of(user));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        return new HttpEntity(headers);
     }
 }

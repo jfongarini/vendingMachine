@@ -1,5 +1,6 @@
 package com.product;
 
+import com.CommonTest;
 import com.dao.ProductDao;
 import com.domain.product.request.ProductNewRequest;
 import com.domain.product.response.ProductNewResponse;
@@ -35,7 +36,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class NewProductTest {
+public class NewProductTest extends CommonTest {
 
     @SpyBean
     private ProductService service;
@@ -43,7 +44,7 @@ public class NewProductTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/product/new";
+    private String URL = "/api/products";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -74,7 +75,6 @@ public class NewProductTest {
         data.setName("Apple");
         data.setCode("001");
         data.setPrice(1.0);
-        HttpEntity<ProductNewRequest> request = new HttpEntity<>(data);
 
         Mockito.when(apiProductService.getFruit(Mockito.anyString())).thenReturn("Apple");
 
@@ -84,7 +84,7 @@ public class NewProductTest {
         product.setPrice(data.getPrice());
         Mockito.when(productDao.save(Mockito.any())).thenReturn(product);
 
-        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,ProductNewResponse.class);
+        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getAdmin(data),ProductNewResponse.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -97,9 +97,7 @@ public class NewProductTest {
         ProductNewRequest data = new ProductNewRequest();
         data.setName("Apple");
 
-        HttpEntity<ProductNewRequest> request = new HttpEntity<>(data);
-
-        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,ProductNewResponse.class);
+        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getAdmin(data),ProductNewResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -112,11 +110,10 @@ public class NewProductTest {
         data.setName("Apple");
         data.setCode("001");
         data.setPrice(1.0);
-        HttpEntity<ProductNewRequest> request = new HttpEntity<>(data);
 
         Mockito.when(apiProductService.getFruit(Mockito.anyString())).thenReturn(null);
 
-        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,ProductNewResponse.class);
+        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getAdmin(data),ProductNewResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -130,10 +127,9 @@ public class NewProductTest {
         data.setCode("001");
         data.setPrice(1.0);
 
-        HttpEntity<ProductNewRequest> request = new HttpEntity<>(data);
         Mockito.when(apiProductService.getFruit(Mockito.anyString())).thenReturn("Apple");
         Mockito.doThrow(new RuntimeException()).when(productDao).save(Mockito.any());
-        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,ProductNewResponse.class);
+        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getAdmin(data),ProductNewResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.PRODUCT_NEW_FAIL.getText(), response.getBody().getError().getMessage());
@@ -146,11 +142,9 @@ public class NewProductTest {
         data.setCode("001");
         data.setPrice(1.0);
 
-        HttpEntity<ProductNewRequest> request = new HttpEntity<>(data);
-
         Mockito.doThrow(new RuntimeException()).when(service).newProduct(Mockito.any(), Mockito.any());
 
-        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, request,ProductNewResponse.class);
+        ResponseEntity<ProductNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getAdmin(data),ProductNewResponse.class);
         Mockito.doCallRealMethod().when(service).newProduct(Mockito.any(), Mockito.any());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

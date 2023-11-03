@@ -1,8 +1,10 @@
 package com.coin;
 
+import com.CommonTest;
 import com.dao.CoinDao;
 import com.domain.coin.request.CoinUpdateRequest;
 import com.domain.coin.response.CoinUpdateResponse;
+import com.security.JwtService;
 import com.util.enums.MessagesEnum;
 import com.model.Coin;
 import com.service.CoinService;
@@ -31,7 +33,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class UpdateCoinTest {
+public class UpdateCoinTest extends CommonTest {
 
     @SpyBean
     private CoinService service;
@@ -66,16 +68,15 @@ public class UpdateCoinTest {
         coin.setCoinId(10);
         coin.setName("ten");
         coin.setValue(10.0);
-        Mockito.when(coinDao.findById(Mockito.any())).thenReturn(Optional.of(coin));
+        Mockito.when(coinDao.findById(Mockito.anyInt())).thenReturn(Optional.of(coin));
 
         CoinUpdateRequest data = new CoinUpdateRequest();
         data.setName("ten10");
-        HttpEntity<CoinUpdateRequest> request = new HttpEntity<>(data);
 
         coin.setName(data.getName());
         Mockito.when(coinDao.save(Mockito.any())).thenReturn(coin);
 
-        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,CoinUpdateResponse.class,10);
+        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),CoinUpdateResponse.class,10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -85,9 +86,8 @@ public class UpdateCoinTest {
     @Test
     public void coinUpdateRequestFail(){
         CoinUpdateRequest data = new CoinUpdateRequest();
-        HttpEntity<CoinUpdateRequest> request = new HttpEntity<>(data);
 
-        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,CoinUpdateResponse.class,10);
+        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),CoinUpdateResponse.class,10);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -98,11 +98,10 @@ public class UpdateCoinTest {
     public void coinUpdateCoinNull(){
         CoinUpdateRequest data = new CoinUpdateRequest();
         data.setName("ten10");
-        HttpEntity<CoinUpdateRequest> request = new HttpEntity<>(data);
 
-        Mockito.when(coinDao.findById(Mockito.any())).thenReturn(null);
+        Mockito.when(coinDao.findById(Mockito.anyInt())).thenReturn(null);
 
-        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,CoinUpdateResponse.class,10);
+        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),CoinUpdateResponse.class,10);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -113,10 +112,9 @@ public class UpdateCoinTest {
     public void coinUpdateException(){
         CoinUpdateRequest data = new CoinUpdateRequest();
         data.setName("ten10");
-        HttpEntity<CoinUpdateRequest> request = new HttpEntity<>(data);
 
         Mockito.doThrow(new RuntimeException()).when(coinDao).findById(Mockito.anyInt());
-        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,CoinUpdateResponse.class,10);
+        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),CoinUpdateResponse.class,10);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.COIN_UPDATE_FAIL.getText(), response.getBody().getError().getMessage());
@@ -126,11 +124,10 @@ public class UpdateCoinTest {
     public void coinUpdateControllerException(){
         CoinUpdateRequest data = new CoinUpdateRequest();
         data.setName("ten10");
-        HttpEntity<CoinUpdateRequest> request = new HttpEntity<>(data);
 
         Mockito.doThrow(new RuntimeException()).when(service).updateCoin(Mockito.any(), Mockito.anyInt());
 
-        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,CoinUpdateResponse.class,10);
+        ResponseEntity<CoinUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),CoinUpdateResponse.class,10);
         Mockito.doCallRealMethod().when(service).updateCoin(Mockito.any(), Mockito.anyInt());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

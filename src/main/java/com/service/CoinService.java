@@ -58,7 +58,7 @@ public class CoinService {
     public CoinDeleteResponse deleteCoin(int id) {
         try {
             Optional<Coin> coin = coinDao.findById(id);
-            if (Objects.isNull(coin)){
+            if (coin.isEmpty() || coin.get().getExist().equals("false")){
                 return new CoinDeleteResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.COIN_NOT_EXIST.getText()).build()).build();
             }

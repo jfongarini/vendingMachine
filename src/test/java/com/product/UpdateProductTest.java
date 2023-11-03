@@ -1,5 +1,6 @@
 package com.product;
 
+import com.CommonTest;
 import com.dao.ProductDao;
 import com.domain.product.request.ProductUpdateRequest;
 import com.domain.product.response.ProductUpdateResponse;
@@ -28,7 +29,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class UpdateProductTest {
+public class UpdateProductTest extends CommonTest {
 
     @SpyBean
     private ProductService service;
@@ -36,7 +37,7 @@ public class UpdateProductTest {
     @LocalServerPort
     int localServerPort;
 
-    private String URL = "/api/product/update/{id}";
+    private String URL = "/api/products/{id}";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -64,16 +65,16 @@ public class UpdateProductTest {
         product.setName("Apple");
         product.setCode("001");
         product.setPrice(1.0);
-        Mockito.when(productDao.findById(Mockito.any())).thenReturn(Optional.of(product));
+        product.setExist(true);
+        Mockito.when(productDao.findById(Mockito.anyInt())).thenReturn(Optional.of(product));
 
         ProductUpdateRequest data = new ProductUpdateRequest();
         data.setCode("099");
-        HttpEntity<ProductUpdateRequest> request = new HttpEntity<>(data);
 
         product.setCode(data.getCode());
         Mockito.when(productDao.save(Mockito.any())).thenReturn(product);
 
-        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,ProductUpdateResponse.class,10);
+        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),ProductUpdateResponse.class,10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -83,9 +84,8 @@ public class UpdateProductTest {
     @Test
     public void productUpdateRequestFail(){
         ProductUpdateRequest data = new ProductUpdateRequest();
-        HttpEntity<ProductUpdateRequest> request = new HttpEntity<>(data);
 
-        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,ProductUpdateResponse.class,10);
+        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),ProductUpdateResponse.class,10);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -96,11 +96,10 @@ public class UpdateProductTest {
     public void productUpdateProductNull(){
         ProductUpdateRequest data = new ProductUpdateRequest();
         data.setCode("099");
-        HttpEntity<ProductUpdateRequest> request = new HttpEntity<>(data);
 
-        Mockito.when(productDao.findById(Mockito.any())).thenReturn(null);
+        Mockito.when(productDao.findById(Mockito.anyInt())).thenReturn(null);
 
-        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,ProductUpdateResponse.class,10);
+        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),ProductUpdateResponse.class,10);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -111,10 +110,9 @@ public class UpdateProductTest {
     public void productUpdateException(){
         ProductUpdateRequest data = new ProductUpdateRequest();
         data.setCode("099");
-        HttpEntity<ProductUpdateRequest> request = new HttpEntity<>(data);
 
         Mockito.doThrow(new RuntimeException()).when(productDao).findById(Mockito.anyInt());
-        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,ProductUpdateResponse.class,10);
+        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),ProductUpdateResponse.class,10);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.PRODUCT_UPDATE_FAIL.getText(), response.getBody().getError().getMessage());
@@ -124,11 +122,10 @@ public class UpdateProductTest {
     public void productUpdateControllerException(){
         ProductUpdateRequest data = new ProductUpdateRequest();
         data.setCode("099");
-        HttpEntity<ProductUpdateRequest> request = new HttpEntity<>(data);
 
         Mockito.doThrow(new RuntimeException()).when(service).updateProduct(Mockito.any(), Mockito.anyInt());
 
-        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, request,ProductUpdateResponse.class,10);
+        ResponseEntity<ProductUpdateResponse> response = restTemplate.exchange(URL, HttpMethod.PUT, getAdmin(data),ProductUpdateResponse.class,10);
         Mockito.doCallRealMethod().when(service).updateProduct(Mockito.any(), Mockito.anyInt());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
