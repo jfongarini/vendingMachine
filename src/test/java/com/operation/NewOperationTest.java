@@ -33,7 +33,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class NewOperationTest extends CommonTest {
+public class NewOperationTest {
 
     @SpyBean
     private OperationService service;
@@ -79,7 +79,7 @@ public class NewOperationTest extends CommonTest {
         vendingMachine.setName("first");
         Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
         Mockito.when(operationDao.save(Mockito.any())).thenReturn(null);
-        ResponseEntity<OperationNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(new HttpHeaders()),OperationNewResponse.class,5);
+        ResponseEntity<OperationNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(vendingMachine),OperationNewResponse.class,5);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -88,8 +88,11 @@ public class NewOperationTest extends CommonTest {
 
     @Test
     public void operationNewVMNull(){
-
-        ResponseEntity<OperationNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationNewResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+        ResponseEntity<OperationNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(headers),OperationNewResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.VM_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -97,9 +100,12 @@ public class NewOperationTest extends CommonTest {
 
     @Test
     public void coinNewException(){
-
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
         Mockito.doThrow(new RuntimeException()).when(vendingMachineDao).findById(Mockito.anyInt());
-        ResponseEntity<OperationNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationNewResponse.class,5);
+        ResponseEntity<OperationNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(headers),OperationNewResponse.class,5);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_NEW_FAIL.getText(), response.getBody().getError().getMessage());
@@ -107,10 +113,13 @@ public class NewOperationTest extends CommonTest {
 
     @Test
     public void operationNewControllerException(){
-
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
         Mockito.doThrow(new RuntimeException()).when(service).newOperation(Mockito.anyInt());
 
-        ResponseEntity<OperationNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationNewResponse.class,5);
+        ResponseEntity<OperationNewResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(headers),OperationNewResponse.class,5);
         Mockito.doCallRealMethod().when(service).newOperation(Mockito.anyInt());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

@@ -1,6 +1,5 @@
 package com.operation;
 
-import com.CommonTest;
 import com.dao.*;
 import com.domain.operation.response.OperationCancelResponse;
 import com.model.Operation;
@@ -34,7 +33,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class CancelOperationTest extends CommonTest {
+public class CancelOperationTest {
 
 
     @SpyBean
@@ -97,10 +96,14 @@ public class CancelOperationTest extends CommonTest {
         List<Product> products = new ArrayList<>();
         products.add(product);
         vendingMachine.setProducts(products);
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
-        Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
 
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(headers),OperationCancelResponse.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -109,7 +112,30 @@ public class CancelOperationTest extends CommonTest {
 
     @Test
     public void cancelOperationVmNull(){
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setId(5);
+        vendingMachine.setName("first");
+        Product product = new Product();
+        product.setProductId(10);
+        product.setName("Apple");
+        product.setPrice(0.5);
+        product.setCode("001");
+        productDao.save(product);
+
+        Operation operation = setOperation(vendingMachine,product);
+        Set<Operation> operations = new HashSet<>();
+        operations.add(operation);
+        List<Product> products = new ArrayList<>();
+        products.add(product);
+        vendingMachine.setProducts(products);
+
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<Void>(headers),OperationCancelResponse.class);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.VM_NOT_EXIST.getText(), response.getBody().getError().getMessage());
     }
@@ -120,9 +146,9 @@ public class CancelOperationTest extends CommonTest {
         vendingMachine.setId(5);
         vendingMachine.setName("first");
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
 
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(vendingMachine),OperationCancelResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -130,9 +156,12 @@ public class CancelOperationTest extends CommonTest {
 
     @Test
     public void cancelOperationException(){
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setId(5);
+        vendingMachine.setName("first");
 
-        Mockito.doThrow(new RuntimeException()).when(vendingMachineDao).findById(Mockito.any());
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
+        Mockito.doThrow(new RuntimeException()).when(operationDao).findByUser(Mockito.any());
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(vendingMachine),OperationCancelResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_CANCEL_FAIL.getText(), response.getBody().getError().getMessage());
@@ -140,9 +169,11 @@ public class CancelOperationTest extends CommonTest {
 
     @Test
     public void cancelOperationControllerException(){
-
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setId(5);
+        vendingMachine.setName("first");
         Mockito.doThrow(new RuntimeException()).when(service).cancelOperation(Mockito.anyString());
-        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(),OperationCancelResponse.class,5,1);
+        ResponseEntity<OperationCancelResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(vendingMachine),OperationCancelResponse.class);
         Mockito.doCallRealMethod().when(service).cancelOperation(Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

@@ -34,7 +34,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class GetOperationProductsTest extends CommonTest {
+public class GetOperationProductsTest {
 
     @SpyBean
     private OperationService service;
@@ -83,10 +83,10 @@ public class GetOperationProductsTest extends CommonTest {
         Operation operation = setOperation(vendingMachine);
         Set<Operation> operations = new HashSet<>();
         operations.add(operation);
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
-        Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
 
-        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getUser(),OperationGetSelectedProductsResponse.class,5,1);
+        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getUser(vendingMachine),OperationGetSelectedProductsResponse.class,5,1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -95,7 +95,11 @@ public class GetOperationProductsTest extends CommonTest {
 
     @Test
     public void getProductsOperationVmNull(){
-        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getUser(),OperationGetSelectedProductsResponse.class,5,1);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, new HttpEntity<Void>(headers),OperationGetSelectedProductsResponse.class,5,1);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.VM_NOT_EXIST.getText(), response.getBody().getError().getMessage());
     }
@@ -107,9 +111,9 @@ public class GetOperationProductsTest extends CommonTest {
         vendingMachine.setName("first");
         Operation operation = setOperation(vendingMachine);
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
 
-        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getUser(),OperationGetSelectedProductsResponse.class,5,1);
+        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getUser(vendingMachine),OperationGetSelectedProductsResponse.class,5,1);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -117,9 +121,13 @@ public class GetOperationProductsTest extends CommonTest {
 
     @Test
     public void getProductsOperationException(){
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
         Mockito.doThrow(new RuntimeException()).when(vendingMachineDao).findById(Mockito.any());
 
-        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getUser(),OperationGetSelectedProductsResponse.class,5,1);
+        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET,new HttpEntity<Void>(headers),OperationGetSelectedProductsResponse.class,5,1);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_GET_PRODUCT_FAIL.getText(), response.getBody().getError().getMessage());
@@ -127,9 +135,13 @@ public class GetOperationProductsTest extends CommonTest {
 
     @Test
     public void getProductsOperationControllerException(){
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
         Mockito.doThrow(new RuntimeException()).when(service).getProductOperation(Mockito.anyString());
 
-        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET, getUser(),OperationGetSelectedProductsResponse.class,5,1);
+        ResponseEntity<OperationGetSelectedProductsResponse> response = restTemplate.exchange(URL, HttpMethod.GET,new HttpEntity<Void>(headers),OperationGetSelectedProductsResponse.class,5,1);
         Mockito.doCallRealMethod().when(service).getProductOperation(Mockito.anyString());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

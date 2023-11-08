@@ -113,8 +113,8 @@ public class AddCoinsOperationTest{
         operation.setStatus(StatusEnum.OPEN.name());
         operation.setDate(new Date());
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
-        Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
@@ -128,7 +128,12 @@ public class AddCoinsOperationTest{
         operationAddCoinRequestList.add(coinData2);
         data.setCoins(operationAddCoinRequestList);
 
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<OperationAddCoinsRequest>(data,headers),OperationAddCoinsResponse.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -145,7 +150,12 @@ public class AddCoinsOperationTest{
         List<OperationAddCoinRequest> operationAddCoinRequestList = new ArrayList<>();
         data.setCoins(operationAddCoinRequestList);
 
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<OperationAddCoinsRequest>(headers),OperationAddCoinsResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -163,7 +173,12 @@ public class AddCoinsOperationTest{
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
 
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<OperationAddCoinsRequest>(headers),OperationAddCoinsResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.VM_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -176,7 +191,7 @@ public class AddCoinsOperationTest{
         vendingMachine.setId(5);
         vendingMachine.setName("first");
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
@@ -186,7 +201,7 @@ public class AddCoinsOperationTest{
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
 
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST,getUser(data),OperationAddCoinsResponse.class,5);
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST,getUser(data,vendingMachine),OperationAddCoinsResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -214,8 +229,8 @@ public class AddCoinsOperationTest{
         operation.setStatus(StatusEnum.CLOSE_OK.name());
         operation.setDate(new Date());
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
-        Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
@@ -225,7 +240,12 @@ public class AddCoinsOperationTest{
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
 
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST,new HttpEntity<OperationAddCoinsRequest>(headers),OperationAddCoinsResponse.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_CLOSED.getText(), response.getBody().getError().getMessage());
@@ -253,7 +273,7 @@ public class AddCoinsOperationTest{
         operation.setDate(new Date());
 
         Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
-        Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
         OperationAddCoinRequest coinData1 = new OperationAddCoinRequest();
@@ -263,7 +283,12 @@ public class AddCoinsOperationTest{
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
 
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<OperationAddCoinsRequest>(headers),OperationAddCoinsResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.COIN_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -284,7 +309,12 @@ public class AddCoinsOperationTest{
         operationAddCoinRequestList.add(coinData1);
         data.setCoins(operationAddCoinRequestList);
 
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data,vendingMachine),OperationAddCoinsResponse.class);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_INS_COIN_FAIL.getText(), response.getBody().getError().getMessage());
@@ -292,17 +322,19 @@ public class AddCoinsOperationTest{
 
     @Test
     public void operationAddCoinsControllerException(){
-
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setId(5);
+        vendingMachine.setName("first");
         Mockito.doThrow(new RuntimeException()).when(service).addCoinsOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
         OperationAddCoinsRequest data = new OperationAddCoinsRequest();
 
-        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationAddCoinsResponse.class,5);
+        ResponseEntity<OperationAddCoinsResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data,vendingMachine),OperationAddCoinsResponse.class);
         Mockito.doCallRealMethod().when(service).addCoinsOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
-    public HttpEntity<HttpHeaders> getUser(VendingMachine vendingMachine){
+    public HttpEntity<HttpHeaders> getUser(OperationAddCoinsRequest data, VendingMachine vendingMachine){
         Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
         Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
 
@@ -313,6 +345,6 @@ public class AddCoinsOperationTest{
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer 123");
 
-        return new HttpEntity(headers);
+        return new HttpEntity(data, headers);
     }
 }

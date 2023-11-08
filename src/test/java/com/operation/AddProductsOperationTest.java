@@ -42,7 +42,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
-public class AddProductsOperationTest extends CommonTest {
+public class AddProductsOperationTest{
 
     @SpyBean
     private OperationService service;
@@ -107,13 +107,18 @@ public class AddProductsOperationTest extends CommonTest {
         operation.setStatus(StatusEnum.OPEN.name());
         operation.setDate(new Date());
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
-        Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
         data.setCode("001");
 
-        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST,getUser(data),OperationSelectProductResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST,new HttpEntity<OperationSelectProductRequest>(data,headers),OperationSelectProductResponse.class,5);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getMessage());
@@ -126,7 +131,12 @@ public class AddProductsOperationTest extends CommonTest {
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
 
-        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationSelectProductResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<OperationSelectProductRequest>(data,headers),OperationSelectProductResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody().getError().getMessage());
@@ -138,7 +148,12 @@ public class AddProductsOperationTest extends CommonTest {
         OperationSelectProductRequest data = new OperationSelectProductRequest();
         data.setCode("001");
 
-        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationSelectProductResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<OperationSelectProductRequest>(data,headers),OperationSelectProductResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.VM_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -151,12 +166,12 @@ public class AddProductsOperationTest extends CommonTest {
         vendingMachine.setId(5);
         vendingMachine.setName("first");
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
         data.setCode("001");
 
-        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationSelectProductResponse.class,5);
+        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data,vendingMachine),OperationSelectProductResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -184,13 +199,18 @@ public class AddProductsOperationTest extends CommonTest {
         operation.setStatus(StatusEnum.CLOSE_OK.name());
         operation.setDate(new Date());
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
-        Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
         data.setCode("001");
 
-        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationSelectProductResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<OperationSelectProductRequest>(data,headers),OperationSelectProductResponse.class,5);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_CLOSED.getText(), response.getBody().getError().getMessage());
@@ -218,13 +238,18 @@ public class AddProductsOperationTest extends CommonTest {
         operation.setStatus(StatusEnum.OPEN.name());
         operation.setDate(new Date());
 
-        Mockito.when(vendingMachineDao.findById(Mockito.any())).thenReturn(Optional.of(vendingMachine));
-        Mockito.when(operationDao.findById(Mockito.any())).thenReturn(Optional.of(operation));
+        Mockito.when(vendingMachineDao.findById(Mockito.anyInt())).thenReturn(Optional.of(vendingMachine));
+        Mockito.when(operationDao.findByUser(Mockito.any())).thenReturn(Optional.of(operation));
 
         OperationSelectProductRequest data = new OperationSelectProductRequest();
         data.setCode("001");
 
-        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationSelectProductResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, new HttpEntity<OperationSelectProductRequest>(data,headers),OperationSelectProductResponse.class,5);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.PRODUCT_NOT_EXIST.getText(), response.getBody().getError().getMessage());
@@ -240,7 +265,12 @@ public class AddProductsOperationTest extends CommonTest {
         OperationSelectProductRequest data = new OperationSelectProductRequest();
         data.setCode("001");
 
-        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationSelectProductResponse.class,5);
+        Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
+        Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer 123");
+
+        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data,vendingMachine),OperationSelectProductResponse.class,5);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(MessagesEnum.OPERATION_INS_PRODUCT_FAIL.getText(), response.getBody().getError().getMessage());
@@ -248,17 +278,19 @@ public class AddProductsOperationTest extends CommonTest {
 
     @Test
     public void operationAddProductsControllerException(){
-
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setId(5);
+        vendingMachine.setName("first");
         Mockito.doThrow(new RuntimeException()).when(service).addProductOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
         OperationSelectProductRequest data = new OperationSelectProductRequest();
 
-        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data),OperationSelectProductResponse.class,5);
+        ResponseEntity<OperationSelectProductResponse> response = restTemplate.exchange(URL, HttpMethod.POST, getUser(data,vendingMachine),OperationSelectProductResponse.class,5);
         Mockito.doCallRealMethod().when(service).addProductOperation(Mockito.anyString(),Mockito.any(), Mockito.any());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
-    public HttpEntity<HttpHeaders> getUser(VendingMachine vendingMachine){
+    public HttpEntity<HttpHeaders> getUser(OperationSelectProductRequest data,VendingMachine vendingMachine){
         Mockito.when(jwtService.getUserNameFromToken(Mockito.anyString())).thenReturn("1");
         Mockito.when(jwtService.isTokenValid(Mockito.anyString(),Mockito.any())).thenReturn(true);
 
@@ -269,6 +301,6 @@ public class AddProductsOperationTest extends CommonTest {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer 123");
 
-        return new HttpEntity(headers);
+        return new HttpEntity(data,headers);
     }
 }
