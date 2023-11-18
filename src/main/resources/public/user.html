@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vending Machine</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/user.css">
+</head>
+<body>
+    <div class="table-container">
+        <h2>Products</h2>
+        <br>
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>                    
+                    <th>Price</th>
+                    <th>Qty</th>
+                </tr>
+            </thead>
+            <tbody id="product-list">
+                <!-- Las filas de la tabla se cargarán dinámicamente desde el script -->
+            </tbody>
+        </table>
+    </div>
+    <div class="vending-machine-container">
+        <div class="coin-insertion">
+            <div class="insert-coins">
+                <h2>Insert Coins</h2>
+                <select id="coin-select">
+                    <!-- Las opciones de monedas se llenarán dinámicamente desde el script -->
+                </select>
+                <button id="insert-button">Insert</button>
+                <p>Total: $<span id="total-amount">0.00</span></p>
+            </div>
+            <div class="code-input">
+                <input type="text" id="code-input" placeholder="Code (3 digits)">
+            </div>
+            <div class="action-buttons">
+                <button id="accept-button">Accept</button>
+                <button id="cancel-button">Cancel</button>
+            </div>
+        </div>
+        <div id="purchase-summary">
+            <h2>Purchase Summary</h2>
+            <p>Selected Product: <span id="selected-product-name"></span></p>
+            <p>Coins Inserted: <span id="coins-inserted-amount"></span></p>
+            <p>Your Change: <span id="change-amount"></span></p>
+            <p></p>
+            <p id="purchase-message"></p>
+            <button id="new-operation-button">New Operation</button>
+        </div>
+    </div>
+    <div class="go-back-button">
+        <button id="go-back-button">Go Back</button>
+    </div>
+    
+    <script src="js/user.js"></script>
+</body>
+</html>

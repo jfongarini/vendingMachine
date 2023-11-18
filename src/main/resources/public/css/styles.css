@@ -1,0 +1,15 @@
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('fondo3.jpg');
+    background-position: right;
+    background-repeat: no-repeat;
+    background-color: black;
+    background-size: 20%;
+    background-position-y: bottom;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+}

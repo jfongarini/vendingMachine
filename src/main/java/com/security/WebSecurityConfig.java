@@ -22,7 +22,8 @@ public class WebSecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests(ar -> ar.requestMatchers(
                                 "/*.html",
-                                "/js/*.js",
+                                "/js/*",
+                                "/css/*",
                                 "/api/operations",
                                 "/api/vending-machines/login/**",
                                 "/swagger-ui/**",
@@ -33,6 +34,9 @@ public class WebSecurityConfig {
                                 "/webjars/**",
                                 "/configuration/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/vending-machines").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/vending-machines").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/coins").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
                         .requestMatchers("/api/operations/**").hasRole(UserEnum.USER.name())
                         .requestMatchers("/api/vending-machines/**").hasRole(UserEnum.ADMIN.name())
                         .requestMatchers("/api/coins/**").hasRole(UserEnum.ADMIN.name())

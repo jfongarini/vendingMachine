@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vending Machine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="css/styles.css">
+    <link type="text/css" rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <div class="rectangle">
+        <button id="userButton">User</button>
+        <button id="adminButton">Administrator</button>
+    </div>
+
+    <div class="second-rectangle">
+        <ul id="containerList">
+        </ul>
+        <ul id="containerAdd">
+            <li class="square2" id="square2Add"><input type="text" id="name-input" placeholder="Name" onkeypress="enterDetect(event)"></li>
+            <li class="square-add fa fa-plus" id="squareAdd"></li>
+        </ul>
+    </div>    
+    <script src="js/script.js"></script>
+</body>
+</html>

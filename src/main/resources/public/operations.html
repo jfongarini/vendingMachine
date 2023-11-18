@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vending Machine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="vms.html" class="no-active">VM</a>
+        <a href="vmcoins.html" class="no-active">VM-Coins</a>
+        <a href="vmproducts.html" class="no-active">VM-Products</a>
+        <a href="operations.html" class="active">Operations</a>
+        <a href="coins.html" class="no-active">Coins</a>
+        <a href="product.html" class="no-active">Products</a>
+    </div>
+
+    <div class="coins-container">
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Value</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>User</th>
+                    <th>Total</th>
+                    <th>Product</th>
+                    <th class="th-actions"></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="go-back-button">
+        <button id="go-back-button">Go Back</button>
+    </div>
+    
+    <script src="js/admin.js"></script>
+</body>
+</html>

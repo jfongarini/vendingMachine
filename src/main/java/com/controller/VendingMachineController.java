@@ -85,7 +85,7 @@ public class VendingMachineController {
     }
 
     @GetMapping("vending-machines")
-    public ResponseEntity<VendingMachineGetAllResponse> getAllVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token){
+    public ResponseEntity<VendingMachineGetAllResponse> getAllVendingMachine(){
         try {
             VendingMachineGetAllResponse response = service.getAllVendingMachine();
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
