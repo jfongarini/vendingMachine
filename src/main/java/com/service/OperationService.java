@@ -20,11 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class OperationService {
@@ -32,7 +31,7 @@ public class OperationService {
     final static Logger LOGGER = LoggerFactory.getLogger(OperationService.class);
     private static final Locale locale = new Locale("en", "US");
     private static final DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);
-    private static final DecimalFormat df = new DecimalFormat("0.00",symbols);
+    private static final DecimalFormat df = new DecimalFormat("#0.00",symbols);
 
     @Autowired
     private VendingMachineDao vendingMachineDao;
@@ -65,7 +64,7 @@ public class OperationService {
             }
 
             Operation operation = new Operation();
-            operation.setValue(0.0);
+            operation.setValue(BigDecimal.ZERO);
             operation.setStatus(StatusEnum.OPEN.name());
             operation.setDate(new Date());
 
@@ -164,7 +163,7 @@ public class OperationService {
 
             List<Coin> coinList = coinDao.findAll();
             List<OperationGetCoinData> coins = new ArrayList<>();
-            Double totalValue = 0.0;
+            BigDecimal totalValue = BigDecimal.ZERO;
             for (Coin coin: coinList) {
 
                 long countCoins = operation.getCoins().stream().filter(vmc -> vmc.getName().equals(coin.getName())).count();
@@ -175,7 +174,7 @@ public class OperationService {
                     coinData.setValue(coin.getValue());
                     coinData.setQuantity(countCoins);
                     coins.add(coinData);
-                    totalValue = totalValue + (coinData.getValue() * coinData.getQuantity());
+                    totalValue = totalValue.add(coinData.getValue().multiply(BigDecimal.valueOf(coinData.getQuantity())));
                 }
             }
 
@@ -262,7 +261,7 @@ public class OperationService {
 
             List<Product> productList = productDao.findAll();
             List<OperationGetSelectedProductData> products = new ArrayList<>();
-            double totalValue = 0.0;
+            BigDecimal totalValue = BigDecimal.ZERO;
             for (Product product: productList) {
 
                 long countProducts = operation.getProducts().stream().filter(o -> o.getName().equals(product.getName())).count();
@@ -274,7 +273,7 @@ public class OperationService {
                     productData.setQuantity(countProducts);
                     productData.setCode(product.getCode());
                     products.add(productData);
-                    totalValue = totalValue + (productData.getPrice() * productData.getQuantity());
+                    totalValue = totalValue.add(productData.getPrice().multiply(BigDecimal.valueOf(productData.getQuantity())));
                 }
             }
 
@@ -323,9 +322,9 @@ public class OperationService {
                         .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
-            Double totalValueCoin = operation.getCoins().stream().mapToDouble(Coin::getValue).sum();
-            Double totalValueProduct = operation.getProducts().stream().mapToDouble(Product::getPrice).sum();
-            if (totalValueCoin < totalValueProduct){
+            BigDecimal totalValueCoin = operation.getCoins().stream().map(Coin::getValue).reduce(BigDecimal.ZERO,BigDecimal::add);
+            BigDecimal totalValueProduct = operation.getProducts().stream().map(Product::getPrice).reduce(BigDecimal.ZERO,BigDecimal::add);
+            if (totalValueCoin.compareTo(totalValueProduct) < 0){
                 operation.setStatus(StatusEnum.CLOSE_FAIL.name() + ": money not enough");
                 operation.setValue(totalValueProduct);
                 operationDao.save(operation);
@@ -334,25 +333,36 @@ public class OperationService {
                         withMessage(MessagesEnum.OPERATION_ACCEPT_NOT_ENOUGH.getText()).build()).build();
             }
 
-            Double discountValueProduct = Double.valueOf(df.format(totalValueCoin - totalValueProduct));
+            BigDecimal discountValueProduct = new BigDecimal(df.format(totalValueCoin.subtract(totalValueProduct)));
 
             List<Coin> coinsVMSorted = vendingMachine.getCoins().stream()
                     .sorted(Comparator.comparing(Coin::getValue).reversed())
-                    .collect(toList());
+                    .toList();
             List<OperationAcceptCoinData> coinReturnList = new ArrayList<>();
-            double moneyReturned = 0.0;
+            BigDecimal moneyReturned = BigDecimal.ZERO;
             for (Coin coin: coinsVMSorted){
-                if (coin.getValue() <= discountValueProduct){
-                    discountValueProduct = discountValueProduct - coin.getValue();
+                if (coin.getValue().compareTo(discountValueProduct) <= 0){
+                    discountValueProduct = discountValueProduct.subtract(coin.getValue());
                     long countCoin = coinReturnList.stream().filter(c -> c.getName().equals(coin.getName())).count();
                     OperationAcceptCoinData coinReturn = new OperationAcceptCoinData();
                     coinReturn.setName(coin.getName());
                     coinReturn.setValue(coin.getValue());
                     coinReturn.setQuantity(countCoin + 1);
                     coinReturnList.add(coinReturn);
-                    moneyReturned = moneyReturned + coin.getValue();
+                    moneyReturned = moneyReturned.add(coin.getValue());
+                    vendingMachine.getCoins().remove(coin);
                 }
             }
+
+            if (!discountValueProduct.equals(new BigDecimal("0.00"))){
+                LOGGER.error("Accept Operation failed, money not enough for return.");
+                operation.setStatus(StatusEnum.CLOSE_FAIL.name() + ": money not enough for return");
+                operation.setValue(totalValueProduct);
+                operationDao.save(operation);
+                return new OperationAcceptResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
+                        withMessage(MessagesEnum.OPERATION_ACCEPT_NOT_ENOUGH_RETURN.getText()).build()).build();
+            }
+
             List<OperationAcceptProductData> productReturnList = new ArrayList<>();
             for (Product product: operation.getProducts()){
                 OperationAcceptProductData productData = productReturnList.stream().filter(p -> p.getCode().equals(product.getCode())).findFirst().orElse(null);
@@ -414,7 +424,7 @@ public class OperationService {
                         .withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
-            Double totalValueProduct = operation.getProducts().stream().mapToDouble(Product::getPrice).sum();
+            BigDecimal totalValueProduct = operation.getProducts().stream().map(Product::getPrice).reduce(BigDecimal.ZERO,BigDecimal::add);
             operation.setStatus(StatusEnum.CANCELED.name());
             operation.setValue(totalValueProduct);
             operationDao.save(operation);

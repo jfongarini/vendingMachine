@@ -1,13 +1,14 @@
 package com.domain.operation.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OperationGetSelectedProductsData implements Serializable {
 
     private int operation;
-    private Double totalValue;
+    private BigDecimal totalValue;
     private List<OperationGetSelectedProductData> products = new ArrayList<>();
 
     public int getOperation() {
@@ -26,11 +27,11 @@ public class OperationGetSelectedProductsData implements Serializable {
         this.products = products;
     }
 
-    public Double getTotalValue() {
+    public BigDecimal getTotalValue() {
         return totalValue;
     }
 
-    public void setTotalValue(Double totalValue) {
+    public void setTotalValue(BigDecimal totalValue) {
         this.totalValue = totalValue;
     }
 }

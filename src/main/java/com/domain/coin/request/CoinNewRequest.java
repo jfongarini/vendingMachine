@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class CoinNewRequest implements Serializable {
 
@@ -11,7 +12,7 @@ public class CoinNewRequest implements Serializable {
     private String name;
 
     @NotNull
-    private Double value;
+    private BigDecimal value;
 
     public String getName() {
         return name;
@@ -21,11 +22,11 @@ public class CoinNewRequest implements Serializable {
         this.name = name;
     }
 
-    public Double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 }

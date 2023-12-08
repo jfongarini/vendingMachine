@@ -24,6 +24,7 @@ public class WebSecurityConfig {
                                 "/*.html",
                                 "/js/*",
                                 "/css/*",
+                                "/css/images/*",
                                 "/api/operations",
                                 "/api/vending-machines/login/**",
                                 "/swagger-ui/**",
@@ -35,6 +36,7 @@ public class WebSecurityConfig {
                                 "/configuration/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/vending-machines").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/vending-machines").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/vending-machines/products").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/coins").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
                         .requestMatchers("/api/operations/**").hasRole(UserEnum.USER.name())

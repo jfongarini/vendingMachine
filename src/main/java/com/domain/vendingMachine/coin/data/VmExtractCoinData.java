@@ -2,11 +2,12 @@ package com.domain.vendingMachine.coin.data;
 
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class VmExtractCoinData implements Serializable {
 
     private String name;
-    private Double value;
+    private BigDecimal value;
     private Long quantityToDelete;
     private Long oldQuantity;
     private Long newQuantity;
@@ -19,11 +20,11 @@ public class VmExtractCoinData implements Serializable {
         this.name = name;
     }
 
-    public Double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 

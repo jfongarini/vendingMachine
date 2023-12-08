@@ -1,17 +1,18 @@
 package com.domain.operation.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class OperationAcceptData implements Serializable {
 
     private int operation;
     private String status;
-    private Double value;
+    private BigDecimal value;
     private String moneyAdded;
     private int numberOfProducts;
     private List<OperationAcceptProductData> products;
-    private Double moneyReturned;
+    private BigDecimal moneyReturned;
     private List<OperationAcceptCoinData> coinsReturned;
 
     public int getOperation() {
@@ -30,11 +31,11 @@ public class OperationAcceptData implements Serializable {
         this.status = status;
     }
 
-    public Double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
@@ -54,11 +55,11 @@ public class OperationAcceptData implements Serializable {
         this.products = products;
     }
 
-    public Double getMoneyReturned() {
+    public BigDecimal getMoneyReturned() {
         return moneyReturned;
     }
 
-    public void setMoneyReturned(Double moneyReturned) {
+    public void setMoneyReturned(BigDecimal moneyReturned) {
         this.moneyReturned = moneyReturned;
     }
 

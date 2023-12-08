@@ -1,16 +1,16 @@
 package com.domain.vendingMachine.operation.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class VmGetOperationData implements Serializable {
 
     private int operationId;
     private int vendingMachine;
-    private Double value;
-    private Date date;
+    private BigDecimal value;
+    private String date;
     private String status;
     List<VmGetOperationCoinData> coins = new ArrayList<>();
     List<VmGetOperationProductData> products = new ArrayList<>();
@@ -23,19 +23,19 @@ public class VmGetOperationData implements Serializable {
         this.operationId = operationId;
     }
 
-    public Double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

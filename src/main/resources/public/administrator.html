@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vending Machine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="vendingMachine.html" class="no-active">Vending Machine</a>
+        <a href="operations.html" class="no-active">Operations</a>
+        <a href="administrator.html" class="active">Administrator</a>
+    </div>
+
+    <div class="message-container">
+        <H3 id="message-h3"></H3>
+    </div>
+
+    <div class="coins-container">
+        <div class="table-container">
+            <table class="data-table" id="data-table-admin">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="th-actions"></th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="coin-insertion">
+            <div class="insert-coins">
+                <h2>Insert Vending Machine</h2>
+                <div class="code-input">
+                    <input type="text" id="name-input-admin" placeholder="Name">
+                </div>
+                <button class="insert-button" id="insert-button-admin">Insert</button>
+            </div>
+        </div>
+    </div>
+    <div class="coins-container">
+        <div class="table-container">
+            <table class="data-table" id="data-table-coin">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th class="th-actions"></th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="coin-insertion">
+            <div class="insert-coins">
+                <h2>Insert Coins</h2>
+                <div class="code-input">
+                    <input type="text" id="name-input-coin" placeholder="Name">
+                </div>
+                <div class="code-input">
+                    <input type="text" id="value-input-coin" placeholder="Value">
+                </div>
+                <button class="insert-button" id="insert-button-coin">Insert</button>
+            </div>
+        </div>
+    </div>
+    <div class="coins-container">
+        <div class="table-container">
+            <table class="data-table" id="data-table-prod">
+                <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th class="th-actions"></th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="coin-insertion">
+            <div class="insert-coins">
+                <h2>Insert Products</h2>
+                <select id="prod-select">
+                </select>
+                <div class="code-input">
+                    <input type="text" id="value-input-prod" placeholder="Price">
+                </div>
+                <div class="code-input">
+                    <input type="text" id="code-input-prod" placeholder="Code">
+                </div>
+                <button class="insert-button" id="insert-button-prod">Insert</button>
+            </div>
+        </div>
+    </div>
+    <div class="go-back-button">
+        <button id="go-back-button">Go Back</button>
+    </div>
+    
+    <script src="js/admin.js"></script>
+</body>
+</html>

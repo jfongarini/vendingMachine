@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-image: url('fondo3.jpg');
+    background-image: url('images/background.jpg');
     background-position: right;
     background-repeat: no-repeat;
     background-color: black;
@@ -12,4 +12,68 @@ body {
     align-items: center;
     height: 100vh;
     position: relative;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #fff;
+    margin-bottom: 10px;
+    table-layout: auto;
+    background-color: #272b2f;
+    color: #fff;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+    width: auto;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+h2 {
+    margin: 0;
+    color: #fff;
+    text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #272b2f;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #b70000;
+    cursor: not-allowed;
+}
+
+input {
+    padding: 5px;
+    width: 100px;
+    background-color: #272b2f;
+    color: #fff;
+    border: black;
+}
+
+select {
+    margin-top: 10px;
+}
+
+.go-back-button{
+    position: absolute;
+    bottom: 0;
+    left: 0;
 }

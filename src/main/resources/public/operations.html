@@ -9,35 +9,77 @@
 </head>
 <body>
     <div class="navbar">
-        <a href="vms.html" class="no-active">VM</a>
-        <a href="vmcoins.html" class="no-active">VM-Coins</a>
-        <a href="vmproducts.html" class="no-active">VM-Products</a>
+        <a href="vendingMachine.html" class="no-active">Vending Machine</a>
         <a href="operations.html" class="active">Operations</a>
-        <a href="coins.html" class="no-active">Coins</a>
-        <a href="product.html" class="no-active">Products</a>
+        <a href="administrator.html" class="no-active">Administrator</a>
+        <h2 class="vm-name" id="vm-name"></h2>
     </div>
 
     <div class="coins-container">
-        <table id="data-table">
-            <thead>
+        <div class="table-container">
+            <h2>User</h2>
+            <table class="data-table" id="data-table-user">
+                <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Value</th>
                     <th>Date</th>
                     <th>Status</th>
-                    <th>User</th>
                     <th>Total</th>
                     <th>Product</th>
-                    <th class="th-actions"></th>
                 </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div>
+            <h2 class="totals-tit">Total Profit: </h2>
+            <h2 class="totals" id="profit"></h2>
+        </div>
+    </div>
+
+    <div class="oper-admin-container">
+        <div class="coins-container">
+        <div class="table-container">
+            <h2>Coins</h2>
+            <table class="data-table" id="data-table-coin">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Coin</th>
+                    <th>Value</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th>All Money</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="coins-container">
+        <div class="table-container">
+            <h2>Products</h2>
+            <table class="data-table" id="data-table-prod">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Product</th>
+                    <th>Value</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th>All Money</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
     </div>
     <div class="go-back-button">
         <button id="go-back-button">Go Back</button>
     </div>
     
-    <script src="js/admin.js"></script>
+    <script src="js/operations.js"></script>
 </body>
 </html>

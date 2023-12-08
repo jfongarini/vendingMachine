@@ -1,11 +1,12 @@
 package com.domain.product.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class ProductDeleteData implements Serializable {
 
     private String name;
-    private Double price;
+    private BigDecimal price;
     private String code;
 
     public String getName() {
@@ -16,11 +17,11 @@ public class ProductDeleteData implements Serializable {
         this.name = name;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

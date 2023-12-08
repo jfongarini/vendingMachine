@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vending Machine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="vendingMachine.html" class="active">Vending Machine</a>
+        <a href="operations.html" class="no-active">Operations</a>
+        <a href="administrator.html" class="no-active">Administrator</a>
+        <h2 class="vm-name" id="vm-name"></h2>
+    </div>
+
+    <div class="message-container">
+        <H3 id="message-h3"></H3>
+    </div>
+
+    <div class="coins-container">
+        <div class="table-container">
+            <table id="data-table-coins">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th>Qty</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div>
+                <h2 class="totals-tit">Total Coins: </h2>
+                <h2 class="totals" id="total-coins"></h2>
+            </div>
+            <div>
+                <h2 class="totals-tit" >Total Value: </h2>
+                <h2 class="totals" id="total-value-coins"></h2>
+            </div>
+        </div>
+        <div class="coin-insertion">
+            <div class="insert-coins">
+                <h2>Insert Coins</h2>
+                <select id="coin-select">
+                </select>
+                <div class="code-input">
+                    <input type="text" id="qty-input-coins" placeholder="Quantity">
+                </div>
+                <button class="insert-button" id="insert-button-coins">Insert</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="coins-container">
+        <div class="table-container">
+            <table id="data-table-prod">
+                <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div>
+                <h2 class="totals-tit">Total Products: </h2>
+                <h2 class="totals" id="total-prod"></h2>
+            </div>
+            <div>
+                <h2 class="totals-tit">Total Value: </h2>
+                <h2 class="totals" id="total-value-prod"></h2>
+            </div>
+        </div>
+        <div class="coin-insertion">
+            <div class="insert-coins">
+                <h2>Insert Products</h2>
+                <select id="prod-select">
+                </select>
+                <div class="code-input">
+                    <input type="text" id="qty-input-prod" placeholder="Quantity">
+                </div>
+                <button class="insert-button" id="insert-button-prod">Insert</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="extract-container">
+        <div class="coin-insertion">
+            <div class="insert-coins">
+                <h2>Extract all Products</h2>
+                <button class="insert-button" id="extract-button-prod">Extract</button>
+                <div>
+                    <h2 class="totals-tit">Total Coins: </h2>
+                    <h2 class="totals" id="extracted-prod"></h2>
+                </div>
+                <div>
+                    <h2 class="totals-tit">Total Value: </h2>
+                    <h2 class="totals" id="extracted-value-prod"></h2>
+                </div>
+            </div>
+        </div>
+        <div class="coin-insertion">
+            <div class="insert-coins">
+                <h2>Extract all Coins</h2>
+                <button class="insert-button" id="extract-button-coins">Extract</button>
+                <div>
+                    <h2 class="totals-tit">Total Coins: </h2>
+                    <h2 class="totals" id="extracted-coins"></h2>
+                </div>
+                <div>
+                    <h2 class="totals-tit">Total Value: </h2>
+                    <h2 class="totals" id="extracted-value-coins"></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="go-back-button">
+        <button id="go-back-button">Go Back</button>
+    </div>
+    
+    <script src="js/vendingMachine.js"></script>
+</body>
+</html>

@@ -29,20 +29,6 @@ ul#containerList{
     padding: 0px;
 }
 
-button {
-    background-color: #272b2f;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    margin: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
 .second-rectangle {
     position: relative;
     top: -30%;

@@ -68,6 +68,8 @@ public enum MessagesEnum {
     PRODUCT_NEW_OK("New Product created successfully."),
     PRODUCT_NEW_FAIL("New Product failed."),
     PRODUCT_NEW_NOT_AVAILABLE("New Product failed. Product not available."),
+    PRODUCT_NEW_NOT_UNIQUE_NAME("New Product failed. Name already exist."),
+    PRODUCT_NEW_NOT_UNIQUE_CODE("New Product failed. Code already exist."),
     PRODUCT_DELETE_OK("Delete Product successful."),
     PRODUCT_DELETE_FAIL("Delete Product failed."),
     PRODUCT_GET_OK("Get Product successful."),
@@ -78,6 +80,7 @@ public enum MessagesEnum {
     PRODUCT_GET_AVAILABLE_FAIL("Get Available Product failed."),
     PRODUCT_UPDATE_OK("Update Product successful."),
     PRODUCT_UPDATE_FAIL("Update Product failed."),
+    PRODUCT_UPDATE_NOT_UNIQUE_CODE("Update Product failed. Code already exist."),
 
     //Operation
     OPERATION_NOT_EXIST("Operation doesn't exist."),
@@ -95,6 +98,7 @@ public enum MessagesEnum {
     OPERATION_GET_PRODUCT_OK("Get Product from Operation successful."),
     OPERATION_GET_PRODUCT_FAIL("Get Product from Operation failed."),
     OPERATION_ACCEPT_NOT_ENOUGH("Accept Operation failed because the money is not enough."),
+    OPERATION_ACCEPT_NOT_ENOUGH_RETURN("Accept Operation failed because the money is not enough for return."),
     OPERATION_ACCEPT_OK("Accept Operation successful."),
     OPERATION_CANCEL_OK("Cancel Operation successful."),
     OPERATION_CANCEL_FAIL("Cancel Operation failed.")

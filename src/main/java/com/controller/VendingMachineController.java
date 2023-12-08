@@ -96,10 +96,10 @@ public class VendingMachineController {
         }
     }
 
-    @PutMapping("vending-machines")
-    public ResponseEntity<VendingMachineUpdateResponse> updateVendingMachine(@RequestHeader(name = "Authorization", defaultValue = "")  String token, @RequestBody @Valid VendingMachineUpdateRequest request){
+    @PutMapping("vending-machines/{id}")
+    public ResponseEntity<VendingMachineUpdateResponse> updateVendingMachine(@RequestBody @Valid VendingMachineUpdateRequest request,@PathVariable int id){
         try {
-            VendingMachineUpdateResponse response = service.updateVendingMachine(request, token);
+            VendingMachineUpdateResponse response = service.updateVendingMachine(request, id);
             return Optional.ofNullable(response.getError()).isPresent() ? ResponseEntity.status(response.getError().getStatus()).body(response)
                     : ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {

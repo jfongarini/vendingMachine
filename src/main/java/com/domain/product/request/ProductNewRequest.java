@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class ProductNewRequest implements Serializable {
 
@@ -14,7 +15,7 @@ public class ProductNewRequest implements Serializable {
     private String code;
 
     @NotNull
-    private Double price;
+    private BigDecimal price;
 
     public String getName() {
         return name;
@@ -32,11 +33,11 @@ public class ProductNewRequest implements Serializable {
         this.code = code;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 }

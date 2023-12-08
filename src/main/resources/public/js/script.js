@@ -87,6 +87,7 @@ userButton.addEventListener('click', () => {
             localStorage.setItem('token', data.data.token);
             localStorage.setItem('operation', data.data.operation);
             localStorage.setItem('status', data.data.status);
+            localStorage.setItem('idVendingMachine', idVendingMachine);
             const newURL = `user.html`;
             window.location.href = newURL;
         } else {
@@ -123,7 +124,8 @@ adminButton.addEventListener('click', () => {
         if (data) {
             console.log('Post Login Administrator:', data);
             localStorage.setItem('token', data.data.token);
-            const newURL = `vms.html`;
+            localStorage.setItem('name', data.data.name);
+            const newURL = `vendingMachine.html`;
             window.location.href = newURL;
         } else {
             console.warn('Empty Response');

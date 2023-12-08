@@ -2,6 +2,7 @@ package com.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class Coin {
     private String name;
 
     @Column(name = "value")
-    private Double value;
+    private BigDecimal value;
 
     @Column(name = "exist")
     private Boolean exist;
@@ -45,11 +46,11 @@ public class Coin {
         this.name = name;
     }
 
-    public Double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 

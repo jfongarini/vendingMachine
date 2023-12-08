@@ -5,7 +5,6 @@ import com.domain.coin.data.*;
 import com.domain.coin.request.CoinNewRequest;
 import com.domain.coin.request.CoinUpdateRequest;
 import com.domain.coin.response.*;
-import com.security.JwtService;
 import com.util.CommonError;
 import com.util.enums.MessagesEnum;
 import com.model.Coin;
@@ -28,9 +27,6 @@ public class CoinService {
 
     @Autowired
     private CoinDao coinDao;
-
-    @Autowired
-    private JwtService jwtService;
 
     public CoinNewResponse newCoin(CoinNewRequest request, BindingResult result) {
         try {
@@ -58,7 +54,7 @@ public class CoinService {
     public CoinDeleteResponse deleteCoin(int id) {
         try {
             Optional<Coin> coin = coinDao.findById(id);
-            if (coin.isEmpty() || coin.get().getExist().equals("false")){
+            if (coin.isEmpty()){
                 return new CoinDeleteResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.COIN_NOT_EXIST.getText()).build()).build();
             }
@@ -79,7 +75,7 @@ public class CoinService {
     public CoinGetResponse getCoin(int id) {
         try {
             Optional<Coin> coin = coinDao.findById(id);
-            if (Objects.isNull(coin)){
+            if (coin.isEmpty()){
                 return new CoinGetResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.COIN_NOT_EXIST.getText()).build()).build();
             }
@@ -122,7 +118,7 @@ public class CoinService {
                         withMessage(MessagesEnum.COIN_PARAMETERS_FAIL.getText()).build()).build();
             }
             Optional<Coin> coin = coinDao.findById(id);
-            if (Objects.isNull(coin)){
+            if (coin.isEmpty()){
                 return new CoinUpdateResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.COIN_NOT_EXIST.getText()).build()).build();
             }

@@ -26,6 +26,7 @@ import com.domain.vendingMachine.data.*;
 import com.util.enums.MessagesEnum;
 import com.domain.vendingMachine.request.*;
 import com.domain.vendingMachine.response.*;
+import com.util.enums.StatusEnum;
 import com.util.enums.UserEnum;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -45,7 +47,7 @@ public class VendingMachineService {
 
     final static Logger LOGGER = LoggerFactory.getLogger(VendingMachine.class);
     private static final DecimalFormat df = new DecimalFormat("0.00");
-
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     @Autowired
     private VendingMachineDao vendingMachineDao;
 
@@ -79,6 +81,7 @@ public class VendingMachineService {
             userDao.save(user);
 
             VendingMachineLoginData data = new VendingMachineLoginData();
+            data.setName(vendingMachine.getName());
             data.setToken(jwtService.getToken(user));
             return new VendingMachineLoginResponse.Builder().withData(data).withMessage(MessagesEnum.VM_LOGIN_OK.getText()).build();
         } catch (Exception e){
@@ -172,21 +175,14 @@ public class VendingMachineService {
         }
     }
 
-    public VendingMachineUpdateResponse updateVendingMachine(VendingMachineUpdateRequest request, String token) {
+    public VendingMachineUpdateResponse updateVendingMachine(VendingMachineUpdateRequest request, int id) {
         try {
             if (Objects.isNull(request.getName())){
                 return new VendingMachineUpdateResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.VM_PARAMETERS_FAIL.getText()).build()).build();
             }
 
-            int idUser = Integer.parseInt(jwtService.getUserNameFromToken(token));
-            User user = userDao.findById(idUser).orElse(null);
-            if (Objects.isNull(user)) {
-                return new VendingMachineUpdateResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
-                        withMessage(MessagesEnum.USER_NOT_EXIST.getText()).build()).build();
-            }
-
-            VendingMachine vendingMachine = vendingMachineDao.findById(user.getVendingMachine().getId()).orElse(null);
+            VendingMachine vendingMachine = vendingMachineDao.findById(id).orElse(null);
             if (Objects.isNull(vendingMachine)){
                 return new VendingMachineUpdateResponse.Builder().withError(new CommonError.Builder(HttpStatus.BAD_REQUEST.value()).
                         withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
@@ -230,6 +226,8 @@ public class VendingMachineService {
             }
 
             List<VmInsertCoinData> vmInsertCoinDataList = new ArrayList<>();
+            List<Coin> coinList = new ArrayList<>();
+            BigDecimal coinValue = BigDecimal.ZERO;
             for (VmCoinRequest coinRequest:request.getCoins()) {
                 Optional<Coin> coin = coinDao.findByName(coinRequest.getName());
                 if (coin.isEmpty()){
@@ -238,15 +236,25 @@ public class VendingMachineService {
                 }
                 for (int i = 0; i < coinRequest.getQuantity(); i++) {
                     vendingMachine.getCoins().add(coin.get());
+                    coinList.add(coin.get());
                 }
                 VmInsertCoinData vmInsertCoinData = new VmInsertCoinData();
                 vmInsertCoinData.setName(coin.get().getName());
                 vmInsertCoinData.setValue(coin.get().getValue());
                 vmInsertCoinData.setQuantity(coinRequest.getQuantity());
                 vmInsertCoinDataList.add(vmInsertCoinData);
+                coinValue = coinValue.add(coin.get().getValue().multiply(BigDecimal.valueOf(coinRequest.getQuantity())));
             }
 
             vendingMachineDao.save(vendingMachine);
+
+            Operation operation = new Operation();
+            operation.setValue(coinValue);
+            operation.setStatus(StatusEnum.INSERT_COINS.name());
+            operation.setDate(new Date());
+            operation.setUser(user);
+            operation.setCoins(coinList);
+            operationDao.save(operation);
 
             VmInsertCoinsData data = new VmInsertCoinsData();
             data.setVmName(vendingMachine.getName());
@@ -278,10 +286,10 @@ public class VendingMachineService {
             List<Coin> coinList = coinDao.findAll();
             List<VmGetCoinData> coins = new ArrayList<>();
             long totalCoins = 0L;
-            Double totalValue = 0.0;
+            BigDecimal totalValue = BigDecimal.ZERO;
             for (Coin coin: coinList) {
 
-                Long countCoins = vendingMachine.getCoins().stream().filter(vmc -> vmc.getName().equals(coin.getName())).count();
+                long countCoins = vendingMachine.getCoins().stream().filter(vmc -> vmc.getName().equals(coin.getName())).count();
 
                 if (countCoins != 0){
                     VmGetCoinData coinData = new VmGetCoinData();
@@ -290,7 +298,7 @@ public class VendingMachineService {
                     coinData.setQuantity(countCoins);
                     coins.add(coinData);
                     totalCoins = totalCoins + countCoins;
-                    totalValue = totalValue + (coinData.getValue() * countCoins);
+                    totalValue = totalValue.add(coinData.getValue().multiply(BigDecimal.valueOf(countCoins)));
                 }
             }
 
@@ -324,9 +332,11 @@ public class VendingMachineService {
 
             List<Coin> coinList = coinDao.findAll();
             List<VmExtractCoinData> coins = new ArrayList<>();
+            BigDecimal coinValue = BigDecimal.ZERO;
+            List<Coin> operationCoins = vendingMachine.getCoins();
             for (Coin coin: coinList) {
 
-                Long countCoins = vendingMachine.getCoins().stream().filter(vmc -> vmc.getName().equals(coin.getName())).count();
+                long countCoins = vendingMachine.getCoins().stream().filter(vmc -> vmc.getName().equals(coin.getName())).count();
 
                 if (countCoins != 0){
                     VmExtractCoinData coinData = new VmExtractCoinData();
@@ -336,12 +346,20 @@ public class VendingMachineService {
                     coinData.setOldQuantity(countCoins);
                     coinData.setNewQuantity(0L);
                     coins.add(coinData);
+                    coinValue = coinValue.add(coin.getValue().multiply(BigDecimal.valueOf(countCoins)));
                 }
             }
 
-            List<Coin> newCoinList = new ArrayList<>();
-            vendingMachine.setCoins(newCoinList);
+            vendingMachine.setCoins(new ArrayList<>());
             vendingMachineDao.save(vendingMachine);
+
+            Operation operation = new Operation();
+            operation.setValue(coinValue);
+            operation.setStatus(StatusEnum.EXTRACT_COINS.name());
+            operation.setDate(new Date());
+            operation.setUser(user);
+            operation.setCoins(operationCoins);
+            operationDao.save(operation);
 
             VmExtractCoinsData data = new VmExtractCoinsData();
             data.setVmName(vendingMachine.getName());
@@ -379,6 +397,8 @@ public class VendingMachineService {
             }
 
             List<VmInsertProductData> vmInsertProductDataList = new ArrayList<>();
+            List<Product> productList = new ArrayList<>();
+            BigDecimal productValue = BigDecimal.ZERO;
             for (VmProductRequest productRequest:request.getProducts()) {
                 Optional<Product> product = productDao.findByName(productRequest.getName());
                 if (product.isEmpty()){
@@ -387,6 +407,7 @@ public class VendingMachineService {
                 }
                 for (int i = 0; i < productRequest.getQuantity(); i++) {
                     vendingMachine.getProducts().add(product.get());
+                    productList.add(product.get());
                 }
                 VmInsertProductData vmInsertProductData = new VmInsertProductData();
                 vmInsertProductData.setName(product.get().getName());
@@ -394,9 +415,18 @@ public class VendingMachineService {
                 vmInsertProductData.setCode(product.get().getCode());
                 vmInsertProductData.setQuantity(productRequest.getQuantity());
                 vmInsertProductDataList.add(vmInsertProductData);
+                productValue = productValue.add(product.get().getPrice());
             }
 
             vendingMachineDao.save(vendingMachine);
+
+            Operation operation = new Operation();
+            operation.setValue(productValue);
+            operation.setStatus(StatusEnum.INSERT_PRODUCTS.name());
+            operation.setDate(new Date());
+            operation.setUser(user);
+            operation.setProducts(productList);
+            operationDao.save(operation);
 
             VmInsertProductsData data = new VmInsertProductsData();
             data.setVmName(vendingMachine.getName());
@@ -428,10 +458,10 @@ public class VendingMachineService {
             List<Product> productList = productDao.findAll();
             List<VmGetProductData> products = new ArrayList<>();
             long quantity = 0L;
-            Double totalValue = 0.0;
+            BigDecimal totalValue = BigDecimal.ZERO;
             for (Product product: productList) {
 
-                Long countProducts = vendingMachine.getProducts().stream().filter(vmp -> vmp.getName().equals(product.getName())).count();
+                long countProducts = vendingMachine.getProducts().stream().filter(vmp -> vmp.getName().equals(product.getName())).count();
 
                 if (countProducts != 0){
                     VmGetProductData productData = new VmGetProductData();
@@ -441,7 +471,7 @@ public class VendingMachineService {
                     productData.setQuantity(countProducts);
                     products.add(productData);
                     quantity = quantity + countProducts;
-                    totalValue = totalValue + (productData.getPrice() * countProducts);
+                    totalValue = totalValue.add(productData.getPrice().multiply(BigDecimal.valueOf(countProducts)));
                 }
             }
 
@@ -476,9 +506,11 @@ public class VendingMachineService {
 
             List<Product> productList = productDao.findAll();
             List<VmExtractProductData> products = new ArrayList<>();
+            BigDecimal productValue = BigDecimal.ZERO;
+            List<Product> operationProducts = vendingMachine.getProducts();
             for (Product product: productList) {
 
-                Long countProducts = vendingMachine.getProducts().stream().filter(vmp -> vmp.getName().equals(product.getName())).count();
+                long countProducts = vendingMachine.getProducts().stream().filter(vmp -> vmp.getName().equals(product.getName())).count();
 
                 if (countProducts != 0){
                     VmExtractProductData productData = new VmExtractProductData();
@@ -489,12 +521,21 @@ public class VendingMachineService {
                     productData.setOldQuantity(countProducts);
                     productData.setNewQuantity(0L);
                     products.add(productData);
+                    productValue = productValue.add(product.getPrice().multiply(BigDecimal.valueOf(countProducts)));
                 }
             }
 
             List<Product> newProductList = new ArrayList<>();
             vendingMachine.setProducts(newProductList);
             vendingMachineDao.save(vendingMachine);
+
+            Operation operation = new Operation();
+            operation.setValue(productValue);
+            operation.setStatus(StatusEnum.EXTRACT_PRODUCTS.name());
+            operation.setDate(new Date());
+            operation.setUser(user);
+            operation.setProducts(operationProducts);
+            operationDao.save(operation);
 
             VmExtractProductsData data = new VmExtractProductsData();
             data.setVmName(vendingMachine.getName());
@@ -527,7 +568,7 @@ public class VendingMachineService {
                         withMessage(MessagesEnum.VM_NOT_EXIST.getText()).build()).build();
             }
 
-            List<Operation> operations = new ArrayList<>();
+            List<Operation> operations;
             if (Objects.isNull(to) && Objects.isNull(from)){
                 operations = operationDao.findAll();
             } else {
@@ -541,13 +582,14 @@ public class VendingMachineService {
                 operations = operationDao.getAllBetweenDates(dateFrom,dateTo);
             }
 
-            Double totalValue = 0.0;
+            BigDecimal totalValue = BigDecimal.ZERO;
             List<VmGetOperationData> operationDataList = new ArrayList<>();
             for (Operation operation: operations) {
                 VmGetOperationData vmGetOperationData = new VmGetOperationData();
                 vmGetOperationData.setVendingMachine(user.getVendingMachine().getId());
                 vmGetOperationData.setOperationId(operation.getOperationId());
-                vmGetOperationData.setDate(operation.getDate());
+
+                vmGetOperationData.setDate(sdf.format(operation.getDate()));
                 vmGetOperationData.setValue(operation.getValue());
                 vmGetOperationData.setStatus(operation.getStatus());
                 List<VmGetOperationCoinData> vmGetOperationCoinDataList = new ArrayList<>();
@@ -567,7 +609,8 @@ public class VendingMachineService {
                     vmGetOperationProductDataList.add(vmGetOperationProductData);
                 }
                 vmGetOperationData.setProducts(vmGetOperationProductDataList);
-                totalValue = totalValue + operation.getValue();
+                operationDataList.add(vmGetOperationData);
+                totalValue = totalValue.add(operation.getValue());
             }
 
             VmGetOperationsData data = new VmGetOperationsData();
@@ -616,7 +659,7 @@ public class VendingMachineService {
             }
 
             VmGetOperationData data = new VmGetOperationData();
-            data.setDate(operation.get().getDate());
+            data.setDate(sdf.format(operation.get().getDate()));
             data.setVendingMachine(user.getVendingMachine().getId());
             data.setStatus(operation.get().getStatus());
             data.setOperationId(operation.get().getOperationId());

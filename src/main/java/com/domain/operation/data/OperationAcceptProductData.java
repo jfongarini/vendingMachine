@@ -1,12 +1,13 @@
 package com.domain.operation.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class OperationAcceptProductData implements Serializable {
 
     private String name;
     private String code;
-    private Double price;
+    private BigDecimal price;
     private int quantity;
 
     public String getName() {
@@ -25,11 +26,11 @@ public class OperationAcceptProductData implements Serializable {
         this.code = code;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

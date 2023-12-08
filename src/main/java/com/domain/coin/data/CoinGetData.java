@@ -1,16 +1,17 @@
 package com.domain.coin.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class CoinGetData implements Serializable {
     private int id;
     private String name;
-    private Double value;
+    private BigDecimal value;
 
     public CoinGetData() {
     }
 
-    public CoinGetData(int id, String name, Double value) {
+    public CoinGetData(int id, String name, BigDecimal value) {
         this.id = id;
         this.name = name;
         this.value = value;
@@ -32,11 +33,11 @@ public class CoinGetData implements Serializable {
         this.name = name;
     }
 
-    public Double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 }

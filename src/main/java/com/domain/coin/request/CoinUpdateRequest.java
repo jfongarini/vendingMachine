@@ -2,11 +2,12 @@ package com.domain.coin.request;
 
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class CoinUpdateRequest implements Serializable {
 
     private String name;
-    private Double value;
+    private BigDecimal value;
 
     public String getName() {
         return name;
@@ -16,11 +17,11 @@ public class CoinUpdateRequest implements Serializable {
         this.name = name;
     }
 
-    public Double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 }

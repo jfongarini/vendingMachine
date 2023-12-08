@@ -2,6 +2,7 @@ package com.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +18,7 @@ public class Operation {
     private int operationId;
 
     @Column(name = "value")
-    private Double value;
+    private BigDecimal value;
 
     @Column(name = "date")
     private Date date;
@@ -77,11 +78,11 @@ public class Operation {
         this.products = products;
     }
 
-    public Double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 

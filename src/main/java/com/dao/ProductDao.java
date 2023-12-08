@@ -12,6 +12,9 @@ public interface ProductDao extends JpaRepository<Product, Integer> {
     @Query(value = "from Product where name = :name AND exist = true")
     Optional<Product> findByName(@Param("name") String name);
 
+    @Query(value = "from Product where code = :code AND exist = true")
+    Optional<Product> findByCode(@Param("code") String code);
+
     @Query(value = "from Product where productId = :id AND exist = true")
     Optional<Product> findById(@Param("id") int id);
 
